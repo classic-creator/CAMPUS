@@ -131,4 +131,48 @@ public function changePassword(Request $request){
     return response()->json($response,200);
 }
 
+//get all users --admin
+public function getAllUsersAdmin(Request $request){
+
+    $users=User::all();
+    $usersCount = $users->count();
+    $response = [
+        'success' => true,
+        'Total-users' => $usersCount,
+        'users' => $users,
+    ];
+    return response()->json($response, 200);
+}
+
+//update users to admin
+
+public function updateUsersAdmin(Request $request,$id){
+
+    $user=User::where('id',$id)->first();
+
+    $validator=Validator::make($request->all(),[
+      
+        'type'=>'required|numeric',
+        
+    ]);
+    if($validator->fails()){
+        $response=[
+            'success'=>false,
+            'message'=>$validator->errors()
+        ];
+        return response()->json($response,400);
+    };
+
+      
+      $user->type=$request->type;
+      $user->save();
+
+      $response=[
+        'success'=>true,
+        'user'=>$user,
+    
+    ];
+    return response()->json($response,200);
+
+}
 }

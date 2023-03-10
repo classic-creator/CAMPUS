@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\UniversityController;
@@ -37,6 +38,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/getProfile',[UserController::class,'getProfile']);
     Route::post('/changepassword',[UserController::class,'changePassword']);
     Route::post('/registerCollege', [UniversityController::class, 'registerCollege']);
+    Route::post('/apply/course/{id}', [AdmissionController::class, 'applyAdmission']);
 });
 
 // admin protected routes
@@ -44,6 +46,8 @@ Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
     
     Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
     Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
+    Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
+    Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
     
 });
 
@@ -60,6 +64,8 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::get('/college/stuff/course/details', [CoursesController::class, 'getCourseDetailsForStuff']);
     Route::put('/college/stuff/course/{id}', [CoursesController::class, 'updateCourseDetails']);
     Route::delete('/college/stuff/course/{id}', [CoursesController::class, 'deleteCourse']);
+    Route::get('/college/stuff/admissions', [AdmissionController::class, 'getAdmission']);
+    Route::get('/college/stuff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
 });
 
 

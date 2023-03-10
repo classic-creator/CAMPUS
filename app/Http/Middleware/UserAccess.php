@@ -37,7 +37,7 @@ class UserAccess
     }
     return response([
         'message' => 'You don\'t have permission to perform this action'
-    ], 403);
+    ], 401);
     }
 }
 ?>

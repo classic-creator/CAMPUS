@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admission;
 use App\Models\Courses;
 use App\Models\Universitys;
 use App\Models\User;
@@ -223,9 +224,7 @@ class UniversityController extends Controller
         return response()->json($response, 200);
     }
 
-
- 
-
+   
 
 
     //delete college 
