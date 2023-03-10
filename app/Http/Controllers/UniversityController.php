@@ -94,8 +94,9 @@ class UniversityController extends Controller
 
     //get all college for --admin
 
-    public function getAllCollegeAdmin(Request $request){
-        $colleges=Universitys::all();
+    public function getAllCollegeAdmin(Request $request)
+    {
+        $colleges = Universitys::all();
         $CollegCount = $colleges->count();
         $response = [
             'success' => true,
@@ -108,11 +109,10 @@ class UniversityController extends Controller
     //get college details for public
     public function getCollegeDetails(Request $request, $id)
     {
-        
-        
+
+
         $college = Universitys::where('id', $id)->first();
-        $course=DB::table('courses')->where('college_id',$college['id'])->get();
-        
+
         if (!$college) {
             $response = [
                 'success' => false,
@@ -120,41 +120,46 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 404);
         }
-        
+        $course = DB::table('courses')->where('college_id', $college['id'])->get();
+
+
         $response = [
             'success' => true,
             'collegeDetails' => $college,
-            'courses'=>$course
+            'courses' => $course
         ];
         return response()->json($response, 200);
     }
 
 
-       //get college details for college stuff
-       public function getMyCollegeDetails(Request $request)
-       {
-           $user = $request->user();
-           $userId = $user['id'];
-   
-           // $college=DB::table('universitys')->where('create-by',$userId)->get();   //if a user can add more then one college then use this code 
-   
-           $college = Universitys::where('create-by', $userId)->first(); // if a user add only one college then use this code 
-   
-           $response = [
-               'success' => true,
-               $college
-           ];
-           return response()->json($response, 200);
-       }
+    //get college details for college stuff
+    public function getMyCollegeDetails(Request $request)
+    {
+        $user = $request->user();
+        $userId = $user['id'];
 
-       //get college details --admin
-       public function getAllCollegeDetailsAdmin(Request $request,$id){
+        // $college=DB::table('universitys')->where('create-by',$userId)->get();   //if a user can add more then one college then use this code 
 
+        $college = Universitys::where('create-by', $userId)->first(); // if a user add only one college then use this code 
+        if (!$college) {
+            $response = [
+                'success' => false,
+                'message' => 'college not found'
+            ];
+            return response()->json($response, 200);
+        }
+        $response = [
+            'success' => true,
+            $college
+        ];
+        return response()->json($response, 200);
+    }
 
-  
+    //get college details --admin
+    public function getAllCollegeDetailsAdmin(Request $request, $id)
+    {
+
         $college = Universitys::where('id', $id)->first();
-        $course=DB::table('courses')->where('college_id',$college['id'])->get();
-        
         if (!$college) {
             $response = [
                 'success' => false,
@@ -162,15 +167,17 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 404);
         }
-        
+        $course = DB::table('courses')->where('college_id', $college['id'])->get();
+
+
         $response = [
             'success' => true,
             'collegeDetails' => $college,
-            'courses'=>$course
+            'courses' => $course
         ];
         return response()->json($response, 200);
 
-       }
+    }
 
     //update details
     public function updateCollegeDetails(Request $request)
@@ -187,7 +194,8 @@ class UniversityController extends Controller
                 'message' => "college not found"
             ];
             return response()->json($response, 404);
-        };
+        }
+        ;
 
 
         $validator = Validator::make($request->all(), [
@@ -202,7 +210,8 @@ class UniversityController extends Controller
                 'message' => $validator->errors()
             ];
             return response()->json($response, 400);
-        };
+        }
+        ;
 
         //   $college->collegeName=$request->collegeName;
         //   $college->email=$request->email;
@@ -224,7 +233,7 @@ class UniversityController extends Controller
         return response()->json($response, 200);
     }
 
-   
+
 
 
     //delete college 

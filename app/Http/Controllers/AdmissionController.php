@@ -11,13 +11,22 @@ use Validator;
 
 class AdmissionController extends Controller
 {
-    //admission request
+    //apply for admission
 
     public function applyAdmission(Request $request, $id)
     {
 
         $user = $request->user();
         $course = Courses::where('id', $id)->first();
+        if (!$course) {
+            $response = [
+                'success' => false,
+                'message' => "course not found",
+            ];
+            return response()->json($response, 404);
+
+        }
+
         $college = Universitys::where('id', $course['college_id'])->first();
 
         $admissionRecord = Admission::where('courseId', $id)->where('studentId', $user['id'])->first();
@@ -27,7 +36,7 @@ class AdmissionController extends Controller
                 'success' => false,
                 'message' => "apply already",
             ];
-            return response()->json($response, 200);
+            return response()->json($response, 400);
 
         }
 
@@ -64,6 +73,7 @@ class AdmissionController extends Controller
         if(!$college){
             $response = [
                 'success' => false,
+                'message'=>'college not found'
             ];
             return response()->json($response, 200);
         }
@@ -96,7 +106,7 @@ class AdmissionController extends Controller
             return response()->json($response, 404);
         }
 
-        $admission = Admission::where('id', $id)->first();
+        $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
 
         if ($admission) {
 
@@ -120,8 +130,20 @@ class AdmissionController extends Controller
 
     public function updateAdmissionStatus(Request $request, $id)
     {
+        $user = $request->user();
 
-        $admission = Admission::where('id', $id)->first();
+        $college = Universitys::where('create-by', $user['id'])->first();
+
+        if(!$college){
+            $response = [
+                'success' => false,
+                'message'=>'not found'
+
+            ];
+            return response()->json($response, 404);
+        }
+
+        $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
 
         $validator = Validator::make($request->all(), [
 

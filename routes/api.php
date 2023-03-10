@@ -36,8 +36,8 @@ Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails'])
 Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/logout',[UserController::class,'logout']);
     Route::get('/getProfile',[UserController::class,'getProfile']);
-    Route::post('/changepassword',[UserController::class,'changePassword']);
-    Route::post('/registerCollege', [UniversityController::class, 'registerCollege']);
+    Route::put('/changepassword',[UserController::class,'changePassword']);
+    Route::post('/collegeregister', [UniversityController::class, 'registerCollege']);
     Route::post('/apply/course/{id}', [AdmissionController::class, 'applyAdmission']);
 });
 
@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::delete('/college/stuff/course/{id}', [CoursesController::class, 'deleteCourse']);
     Route::get('/college/stuff/admissions', [AdmissionController::class, 'getAdmission']);
     Route::get('/college/stuff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
+    Route::put('/college/stuff/admission/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
 });
 
 

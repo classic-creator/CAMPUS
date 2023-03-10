@@ -31,9 +31,19 @@ class CoursesController extends Controller
             return response()->json($response, 404);
         }
 
-        $user=$request->user();
+        $user = $request->user();
 
-        $college=  Universitys::where('create-by', $user['id'])->first();
+        $college = Universitys::where('create-by', $user['id'])->first();
+
+        if (!$college) {
+            $response = [
+
+                'success' => false,
+                'message' => "Add your college first",
+
+            ];
+            return response()->json($response, 404);
+        }
 
         $course = Courses::create([
             'courseName' => $request->courseName,
@@ -54,97 +64,146 @@ class CoursesController extends Controller
         return response()->json($response, 201);
     }
 
-   // get course details public
-   public function getCourseDetails(Request $request , $id){
+    // get course details public
+    public function getCourseDetails(Request $request, $id)
+    {
 
-    $course = Courses::where('id', $id)->first();
+        $course = Courses::where('id', $id)->first();
+        if (!$course) {
+            $response = [
+                'success' => false,
+                'message' => 'course not found'
+            ];
+            return response()->json($response, 200);
+        }
 
-    $response = [
-        'success' => true,
-        'courses'=>$course
-    ];
-    return response()->json($response, 200);
+        $response = [
+            'success' => true,
+            'courses' => $course
+        ];
+        return response()->json($response, 200);
 
-   }
+    }
 
-   // get course details for authorize user (manager/collegestuff)
+    // get course details for authorize user (manager/collegestuff)
 
-   public function getCourseDetailsForStuff(Request $request){
+    public function getCourseDetailsForStuff(Request $request)
+    {
 
-        $user=$request->user();
-        $college=Universitys::where('create-by',$user['id'])->first();
+        $user = $request->user();
+        $college = Universitys::where('create-by', $user['id'])->first();
+        if (!$college) {
+            $response = [
+                'success' => false,
+                'message' => 'college not found'
+            ];
+            return response()->json($response, 404);
+        }
+        $courses = DB::table('courses')->where('college_id', $college['id'])->get();
 
-        $courses=DB::table('courses')->where('college_id',$college['id'])->get();
-
+        if (!$courses) {
+            $response = [
+                'success' => false,
+                'message' => 'course not found'
+            ];
+            return response()->json($response, 404);
+        }
         $response = [
             'success' => true,
             $courses
         ];
         return response()->json($response, 200);
-   
-   }
 
-   // update course details
+    }
 
-   public function updateCourseDetails(Request $request, $id){
+    // update course details
 
-    $course = Courses::where('id', $id)->first();
-    // $course = DB::table('courses')->find($courseid);
+    public function updateCourseDetails(Request $request, $id)
+    {
 
-    if (!$course) {
+        $user = $request->user();
+        $college = Universitys::where('create-by', $user['id'])->first();
+        if (!$college) {
+            $response = [
+                'success' => false,
+                'message' => 'college not found'
+            ];
+            return response()->json($response, 404);
+        }
+        $course = Courses::where('id', $id)->where('college_id', $college['id'])->first();
+        // $course = DB::table('courses')->find($courseid);
+
+        if (!$course) {
+            $response = [
+                'success' => false,
+                'message' => "course not found"
+            ];
+            return response()->json($response, 404);
+        }
+        ;
+
+        $validator = Validator::make($request->all(), [
+
+            'courseName' => 'required',
+            'fees' => 'required',
+            'duration' => 'required',
+            'eligibility' => 'required',
+        ]);
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+            ];
+            return response()->json($response, 400);
+        }
+        ;
+
+        $course->update([
+            "courseName" => $request->input('courseName'),
+            "fees" => $request->input('fees'),
+            "duration" => $request->input('duration'),
+            "eligibility" => $request->input('eligibility'),
+        ]);
+
+
+        $course->save();
+
         $response = [
-            'success' => false,
-            'message' => "course not found"
+            'success' => true,
+            $course,
+
         ];
-        return response()->json($response, 404);
-    };
+        return response()->json($response, 200);
 
-    $validator = Validator::make($request->all(), [
+    }
+    //delete course
+    public function deleteCourse(Request $request, $id)
+    {
+        $user = $request->user();
+        $college = Universitys::where('create-by', $user['id'])->first();
+        if (!$college) {
+            $response = [
+                'success' => false,
+                'message' => 'college not found'
+            ];
+            return response()->json($response, 200);
+        }
+        $course = Courses::where('id', $id)->where('college_id', $college['id'])->first();
+        if (!$course) {
+            $response = [
+                'success' => false,
+                'message' => ' course not found'
 
-        'courseName' => 'required',
-        'fees' => 'required',
-        'duration' => 'required',
-        'eligibility'=>'required',
-    ]);
-    if ($validator->fails()) {
+            ];
+            return response()->json($response, 404);
+        }
+        $course->delete();
         $response = [
-            'success' => false,
-            'message' => $validator->errors()
+            'success' => true,
+            'message' => 'remove course successfully'
+
         ];
-        return response()->json($response, 400);
-    };
+        return response()->json($response, 200);
 
-    $course->update([
-        "courseName" => $request->input('courseName'),
-        "fees" => $request->input('fees'),
-        "duration" => $request->input('duration'),
-        "eligibility" => $request->input('eligibility'),
-    ]);
-
-   
-    $course->save();
-
-    $response = [
-        'success' => true,
-        $course,
-
-    ];
-    return response()->json($response, 200);
-
-   }
-//delete course
-   public function deleteCourse(Request $request,$id){
-
-  
-
-    Courses::where('id',$id)->first()->delete();
-
-    $response = [
-        'success' => true,
-        'message'=>'remove course successfully'
-
-    ];
-    return response()->json($response, 200);
-
-   }
+    }
 }
