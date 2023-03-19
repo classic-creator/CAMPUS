@@ -47,19 +47,13 @@ class AdmissionController extends Controller
             // 'payment_status'=>$request->payment_status,
             // 'admission_status'=>$request->admission_status
         ]);
-
-
         $response = [
 
             'success' => true,
             'message' => "apply successfully",
             $admission,
-
-
         ];
         return response()->json($response, 201);
-
-
     }
 
     //get all admission request
@@ -145,6 +139,15 @@ class AdmissionController extends Controller
 
         $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
 
+        if(!$admission){
+            $response = [
+                'success' => false,
+                'message'=>'not found'
+
+            ];
+            return response()->json($response, 404);
+        }
+
         $validator = Validator::make($request->all(), [
 
             'admission_status' => 'required',
@@ -160,8 +163,14 @@ class AdmissionController extends Controller
         ;
 
         $admission->admission_status = $request->admission_status;
+
         $admission->save();
 
+        $response = [
+            'success' => true,
+            $admission
+        ];
+        return response()->json($response, 400);
     }
 
 }

@@ -17,7 +17,7 @@ class CoursesController extends Controller
         $validator = Validator::make($request->all(), [
 
             'courseName' => 'required',
-            'fees' => 'required',
+            'fees' => 'required|numeric',
             'duration' => 'required',
             'eligibility' => 'required',
 
@@ -64,6 +64,55 @@ class CoursesController extends Controller
         return response()->json($response, 201);
     }
 
+    //get all courses public
+    public function getAllCourses(Request $request)
+    {
+
+        $course = DB::table('courses')
+            ->select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
+            ->join('universitys', 'universitys.id', '=', 'courses.college_id');
+
+     //search
+            if ($keyword = $request->input('keyword')) {
+            $course->whereRaw("courseName LIKE '%" . $keyword . "%'")
+            ->orWhereRaw("collegeName LIKE '%" . $keyword . "%'")
+            ;
+        }
+
+
+        //filter 
+        if($cl =$request->input('cl')){
+            $course->whereRaw("collegeName LIKE '%" . $cl . "%'");
+        }
+        if($co =$request->input('co')){
+            $course->whereRaw("courseName LIKE'%" .  $co  . "%'");
+        }
+        if($ad =$request->input('ad')){
+            $course->whereRaw("address LIKE'%" .  $ad  . "%'");
+        }
+        
+        if($fe =$request->input('fe')){
+            $course->orderBy("fees",$fe);
+        }
+        
+
+        $courses = $course->get();
+
+        if ($courses) {
+
+            $response = [
+                'success' => true,
+                'courses' => $courses,
+            ];
+            return response()->json($response, 200);
+        }
+        $response = [
+            'success' => false,
+            'message' => 'No courses found'
+        ];
+        return response()->json($response, 404);
+
+    }
     // get course details public
     public function getCourseDetails(Request $request, $id)
     {

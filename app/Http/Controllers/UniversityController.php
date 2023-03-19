@@ -80,15 +80,33 @@ class UniversityController extends Controller
     public function getAllCollege(Request $request)
     {
 
-        $colleges = Universitys::all();
-        $CollegCount = $colleges->count();
+        $colleges = Universitys::query();
+       
 
+        
+        //search
+          if ($keyword = $request->input('keyword')) {
+            $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" .  $keyword  . "%'")
+            ;
+        }
+
+        $result = $colleges->get();
+        $collegCounts = $result->count();
+       
+        if($collegCounts>0){
+ 
+            $response = [
+                'success' => true,
+                'collegeCount'=> $collegCounts,
+                'colleges'=> $result,
+            ];
+            return response()->json($response, 200);
+        }
         $response = [
-            'success' => true,
-            'Total-College' => $CollegCount,
-            'colleges' => $colleges,
+            'success' => false,
+           'message'=>'No college found'
         ];
-        return response()->json($response, 200);
+        return response()->json($response, 404);
 
     }
 
@@ -97,10 +115,10 @@ class UniversityController extends Controller
     public function getAllCollegeAdmin(Request $request)
     {
         $colleges = Universitys::all();
-        $CollegCount = $colleges->count();
+        $collegCounts = $colleges->count();
         $response = [
             'success' => true,
-            'Total-College' => $CollegCount,
+            'collegeCounts' => $collegCounts,
             'colleges' => $colleges,
         ];
         return response()->json($response, 200);
@@ -125,7 +143,7 @@ class UniversityController extends Controller
 
         $response = [
             'success' => true,
-            'collegeDetails' => $college,
+            'college' => $college,
             'courses' => $course
         ];
         return response()->json($response, 200);
