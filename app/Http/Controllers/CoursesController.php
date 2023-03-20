@@ -117,7 +117,13 @@ class CoursesController extends Controller
     public function getCourseDetails(Request $request, $id)
     {
 
-        $course = Courses::where('id', $id)->first();
+        // $course = Courses::where('id', $id)->first();
+
+        $course = DB::table('courses')
+        ->select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
+        ->join('universitys', 'universitys.id', '=', 'courses.college_id')->where('courses.id', $id)->first();
+
+
         if (!$course) {
             $response = [
                 'success' => false,
@@ -128,7 +134,7 @@ class CoursesController extends Controller
 
         $response = [
             'success' => true,
-            'courses' => $course
+            'course' => $course
         ];
         return response()->json($response, 200);
 
