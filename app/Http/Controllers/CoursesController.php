@@ -120,7 +120,7 @@ class CoursesController extends Controller
         // $course = Courses::where('id', $id)->first();
 
         $course = DB::table('courses')
-        ->select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
+        ->select('courses.id','universitys.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
         ->join('universitys', 'universitys.id', '=', 'courses.college_id')->where('courses.id', $id)->first();
 
 

@@ -26,6 +26,7 @@ Route::post('/login', [UserController::class, 'login']);
 Route::post('/sent-reset-password-email',[PasswordResetController::class,'forgetPassword']);
 Route::post('/reset-password/{token}',[PasswordResetController::class,'resetPassword']);
 Route::get('/colleges',[UniversityController::class,'getAllCollege']);
+
 Route::get('/courses',[CoursesController::class,'getAllCourses']);
 Route::get('/college/{id}',[UniversityController::class,'getCollegeDetails']);
 Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails']);
