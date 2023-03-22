@@ -62,12 +62,14 @@ public function login(Request $request){
     $user = User::where('email', $request->email)->first();
 
     if($user && Hash::check($request->password, $user->password)){
+
         $token = $user->createToken($request->email)->plainTextToken;
+        
         return response([
-            'token'=>$token,
             'message' => 'Login Success',
             'status'=>'success',
-            'type'=>$user['type']
+            'user'=>$user,
+            'token'=>$token
         ], 200);
     }
      $response=[
@@ -79,7 +81,7 @@ public function login(Request $request){
 //logout user
 public function logout(){
 
-    auth()->user()->tokens()->delete();
+   auth()->user()->tokens()->delete();
     $response=[
         'success'=>true,
         'message' => 'logout successfully',
@@ -98,6 +100,7 @@ public function getProfile(){
     $response=[
         'success'=>true,
         'user'=>$user,
+      
     
     ];
     return response()->json($response,200);
