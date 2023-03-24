@@ -51,6 +51,10 @@ class PasswordResetController extends Controller
 
         // dump("http://127.0.0.1:3000/api/reset/".$token);
         // sending email for reset email 
+      
+
+        //    $host = request()->getHost();
+      
 
         Mail::send('reset',['token'=>$token],function(Message $message)use($email){
             $message->subject('Reset your password');
