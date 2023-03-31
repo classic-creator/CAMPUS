@@ -17,18 +17,17 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->foreign('student_id')->references('id')->on('users');
-            $table->string('college_preference_1')->nullable();
-            $table->string('college_preference_2')->nullable();
-            $table->string('college_preference_3')->nullable();
-            $table->string('depertment_preference_1')->nullable();
-            $table->string('depertment_preference_2')->nullable();
-            $table->string('depertment_preference_3')->nullable();
-            $table->string('course_preference_1')->nullable();
-            $table->string('course_preference_2')->nullable();
-            $table->string('course_preference_3')->nullable();
-            $table->string('address_preference_1')->nullable();
-            $table->string('address_preference_2')->nullable();
-            $table->string('address_preference_3')->nullable();
+            $table->string('college1')->nullable();
+            $table->string('college2')->nullable();
+            $table->string('college3')->nullable();
+            $table->string('depertment1')->nullable();
+            $table->string('depertment2')->nullable();
+            $table->string('depertment3')->nullable();
+            $table->string('course1')->nullable();
+            $table->string('course2')->nullable();
+            $table->string('course3')->nullable();
+            $table->string('address')->nullable();
+           
             $table->timestamps();
         });
     }

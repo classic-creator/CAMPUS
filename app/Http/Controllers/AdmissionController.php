@@ -23,7 +23,7 @@ class AdmissionController extends Controller
                 'success' => false,
                 'message' => "course not found",
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
 
         }
 
@@ -97,7 +97,7 @@ class AdmissionController extends Controller
                 'message'=>'not found'
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
@@ -117,7 +117,7 @@ class AdmissionController extends Controller
             'message' => 'not found'
 
         ];
-        return response()->json($response, 404);
+        return response()->json($response, 200);
 
     }
     //update admission status
@@ -134,7 +134,7 @@ class AdmissionController extends Controller
                 'message'=>'not found'
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
@@ -145,7 +145,7 @@ class AdmissionController extends Controller
                 'message'=>'not found'
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $validator = Validator::make($request->all(), [

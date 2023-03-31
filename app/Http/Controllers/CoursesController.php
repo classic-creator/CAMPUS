@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Courses;
+use App\Models\Preference;
 use App\Models\Universitys;
 use Illuminate\Http\Request;
 use Validator;
@@ -28,7 +29,7 @@ class CoursesController extends Controller
                 'message' => $validator->errors()
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $user = $request->user();
@@ -42,7 +43,7 @@ class CoursesController extends Controller
                 'message' => "Add your college first",
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $course = Courses::create([
@@ -72,48 +73,104 @@ class CoursesController extends Controller
             ->select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
             ->join('universitys', 'universitys.id', '=', 'courses.college_id');
 
+
      //search
-            if ($keyword = $request->input('keyword')) {
+            if($keyword = $request->input('keyword')) {
             $course->whereRaw("courseName LIKE '%" . $keyword . "%'")
-            ->orWhereRaw("collegeName LIKE '%" . $keyword . "%'")
+            ->orWhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'")
             ;
         }
 
-
         //filter 
-        if($cl =$request->input('cl')){
-            $course->whereRaw("collegeName LIKE '%" . $cl . "%'");
-        }
-        if($co =$request->input('co')){
-            $course->whereRaw("courseName LIKE'%" .  $co  . "%'");
-        }
-        if($ad =$request->input('ad')){
-            $course->whereRaw("address LIKE'%" .  $ad  . "%'");
-        }
         
         if($fe =$request->input('fe')){
             $course->orderBy("fees",$fe);
         }
         
-
         $courses = $course->get();
 
-        if ($courses) {
+        if (!$courses) {
 
             $response = [
                 'success' => true,
-                'courses' => $courses,
+                'message' => 'no course found',
             ];
             return response()->json($response, 200);
         }
         $response = [
-            'success' => false,
-            'message' => 'No courses found'
+            'success' => true,
+            'courses' => $courses
         ];
-        return response()->json($response, 404);
+        return response()->json($response, 200);
 
     }
+
+
+    //get courses with preference
+
+    public function getPreferedCourses(Request $request){
+
+        $user=$request->user();
+
+        $preference=Preference::where("student_id",$user['id'])->first();
+
+        if($preference){
+            // DB::table('courses')
+            $course = Courses::
+            select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
+            ->join('universitys', 'universitys.id', '=', 'courses.college_id')
+            
+             ->where('courses.courseName',$preference['course1'])->orwhere ('courses.courseName',$preference['course2'])->orWhere('courses.courseName',$preference['course3'])
+             // ->orWhere('universitys.address',$preference['address_preference_1'])
+             ;
+
+             
+             if($keyword = $request->input('keyword')) {
+                 $course->where('courseName', 'like', "%{$keyword}%")
+                 ->orWhere('collegeName', 'like', "%{$keyword}%")
+                 ->orWhere('address', 'like',"%{$keyword}%")
+                 ;
+             }
+
+
+
+             if($fe =$request->input('fe')){
+
+                $course->orderBy("fees",$fe);
+            }
+    
+    
+                $preferCourses=$course->get();
+        
+                if(!$preferCourses){
+        
+                    $response = [
+                        'success' => false,
+                        'message' => 'No courses found'
+                    ];
+                    return response()->json($response, 200);
+                }
+        
+                $response = [
+                    'success' => true,
+                    'preferCourses' => $preferCourses,
+                ];
+                return response()->json($response, 200);
+
+
+        }
+
+        $response = [
+            'success' => false,
+            'message' => "Please update Preference",
+        ];
+        return response()->json($response, 200);
+
+    }
+
     // get course details public
+
+
     public function getCourseDetails(Request $request, $id)
     {
 
@@ -152,7 +209,7 @@ class CoursesController extends Controller
                 'success' => false,
                 'message' => 'college not found'
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $courses = DB::table('courses')->where('college_id', $college['id'])->get();
 
@@ -161,7 +218,7 @@ class CoursesController extends Controller
                 'success' => false,
                 'message' => 'course not found'
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $response = [
             'success' => true,
@@ -183,7 +240,7 @@ class CoursesController extends Controller
                 'success' => false,
                 'message' => 'college not found'
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $course = Courses::where('id', $id)->where('college_id', $college['id'])->first();
         // $course = DB::table('courses')->find($courseid);
@@ -193,7 +250,7 @@ class CoursesController extends Controller
                 'success' => false,
                 'message' => "course not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         ;
 
@@ -250,7 +307,7 @@ class CoursesController extends Controller
                 'message' => ' course not found'
 
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $course->delete();
         $response = [

@@ -16,9 +16,9 @@ class PreferenceController extends Controller
 
       $validator = Validator::make($request->all(), [
 
-        'college_preference_1' => 'required',
-        'depertment_preference_1' => 'required',
-        'address_preference_1' => 'required',
+        'college1' => 'required',
+        'course1' => 'required',
+        'address' => 'required',
     ]);
     if ($validator->fails()) {
         $response = [
@@ -26,23 +26,23 @@ class PreferenceController extends Controller
             'message' => $validator->errors()
 
         ];
-        return response()->json($response, 404);
+        return response()->json($response, 200);
     }
 
       $preference=Preference::create([
-          'student_id'=>$user['id'],
-        'college_preference_1'=>$request->college_preference_1,
-        'college_preference_2'=>$request->college_preference_2,
-        'college_preference_3'=>$request->college_preference_3,
-        'course_preference_1'=>$request->course_preference_1,
-        'course_preference_2'=>$request->course_preference_2,
-        'course_preference_3'=>$request->course_preference_3,
-        'depertment_preference_1'=>$request->depertment_preference_1,
-        'depertment_preference_2'=>$request->depertment_preference_2,
-        'depertment_preference_3'=>$request->depertment_preference_3,
-        'address_preference_1'=>$request->address_preference_1,
-        'address_preference_2'=>$request->address_preference_2,
-        'address_preference_3'=>$request->address_preference_3,
+        'student_id'=>$user['id'],
+        'college1'=>$request->college1,
+        'college2'=>$request->college2,
+        'college3'=>$request->college3,
+        'course1'=>$request->course1,
+        'course2'=>$request->course2,
+        'course3'=>$request->course3,
+        'depertment1'=>$request->depertment1,
+        'depertment2'=>$request->depertment2,
+        'depertment3'=>$request->depertment3,
+        'address'=>$request->address,
+        
+       
       ]);
 
       $response = [

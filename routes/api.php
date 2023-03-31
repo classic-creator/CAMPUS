@@ -26,8 +26,7 @@ Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/sent-reset-password-email',[PasswordResetController::class,'forgetPassword']);
 Route::put('/reset-password/{token}',[PasswordResetController::class,'resetPassword']);
-// Route::get('/colleges',[UniversityController::class,'getAllCollege']);
-
+Route::get('/colleges',[UniversityController::class,'getAllCollege']);
 Route::get('/courses',[CoursesController::class,'getAllCourses']);
 Route::get('/college/{id}',[UniversityController::class,'getCollegeDetails']);
 Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails']);
@@ -37,7 +36,8 @@ Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails'])
 
 //login protected routes
 Route::middleware(['auth:sanctum'])->group(function(){
-    Route::get('/colleges',[UniversityController::class,'getAllCollege']);
+   
+    Route::get('/preference/courses',[CoursesController::class,'getPreferedCourses']);
     Route::post('/logout',[UserController::class,'logout']);
     Route::get('/getProfile',[UserController::class,'getProfile']);
     Route::put('/changepassword',[UserController::class,'changePassword']);

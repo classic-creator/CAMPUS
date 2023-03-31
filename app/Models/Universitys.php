@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Universitys extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
+    
     protected $fillable = [
         'collegeName',
         'address',

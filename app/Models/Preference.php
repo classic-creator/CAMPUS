@@ -11,18 +11,15 @@ class Preference extends Model
 
     protected $fillable = [
         'student_id',
-        'college_preference_1',
-        'college_preference_2',
-        'college_preference_3',
-        'course_preference_1',
-        'course_preference_2',
-        'course_preference_3',
-        'depertment_preference_1',
-        'depertment_preference_2',
-        'depertment_preference_3',
-        'address_preference_1',
-        'address_preference_2',
-        'address_preference_3',
-         
+        'college1',
+        'college2',
+        'college3',
+        'course1',
+        'course2',
+        'course3',
+        'depertment1',
+        'depertment2',
+        'depertment3',
+        'address',
     ];
 }

@@ -18,17 +18,19 @@ class PasswordResetController extends Controller
 
         
         $validator=Validator::make($request->all(),[
-            'email'=>'required|email'
+            'forgetEmail'=>'required|email'
         ]);
-        if($validator->fails()){
-            $response=[
-                'success'=>false,
-                'message'=>$validator->errors()
+      
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+
             ];
-            return response()->json($response,404);
-        };
+            return response()->json($response, 200);
+        }
         
-        $email=$request->email;
+        $email=$request->forgetEmail;
         // check user exist or not
         $user=User::where('email',$email)->first();
 
@@ -37,7 +39,7 @@ class PasswordResetController extends Controller
                 'success'=>false,
                 'message'=>'user not found'
             ];
-            return response()->json($response,404);
+            return response()->json($response,200);
         }
 
         //generate token 
@@ -85,17 +87,17 @@ class PasswordResetController extends Controller
                 'success'=>false,
                 'message'=>$validator->errors()
             ];
-            return response()->json($response,404);
+            return response()->json($response,200);
         };
 
         $passwordreset=PasswordReset::where('token',$token)->first();
 
         if(!$passwordreset){
             $response=[
-                'success'=>true,
+                'success'=>false,
                 'message'=>'user not found'
             ];
-            return response()->json($response,404);
+            return response()->json($response,200);
         }
 
         $user=User::where('email',$passwordreset->email)->first();

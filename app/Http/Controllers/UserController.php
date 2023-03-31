@@ -76,7 +76,7 @@ public function login(Request $request){
         'success'=>false,
         'message' => 'The Provided Credentials are incorrect',
     ];
-    return response()->json($response,404);
+    return response()->json($response,401);
 }
 //logout user
 public function logout(){

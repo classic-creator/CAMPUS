@@ -40,7 +40,7 @@ class UniversityController extends Controller
 
         $type = $user['type'];
 
-        if ($user['type'] == 'admin') /*|| Universitys::where("create-by", $user['id'])->exists() )*/ { //one user can add only one college and admin account not add college
+        if ($user['type'] == 'admin') /*|| Universitys::where("create-by", $user['id'])->exists() )*/{ //one user can add only one college and admin account not add college
             $response = [
                 'seccess' => false,
                 'message' => 'you are not eligible for register college '
@@ -79,42 +79,74 @@ class UniversityController extends Controller
 
     //get all college for public
     public function getAllCollege(Request $request)
-
     {
-        $user = $request->user();
-      
         $colleges = Universitys::query();
-        $preference=Preference::where('student_id',$user['id'])->first();
-    
-        if($preference){  
-            $colleges->where('collegeName', $preference['college_preference_1'] )->orWhere( 'collegeName', $preference['college_preference_2']) ->orWhere('collegeName' ,$preference['college_preference_3'] )->orWhere('address',$preference['address_preference_1']);
-        };
-        
+       
         if ($keyword = $request->input('keyword')) {
-            $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" .  $keyword  . "%'")
-            ;
+            $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'");
         }
 
 
         $result = $colleges->get();
-        $collegCounts = $result->count();
-       
-        if(!$result){
- 
+
+        if (!$result) {
+
             $response = [
                 'success' => false,
-               'message'=>'No college found'
+                'message' => 'No college found'
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
+        $collegCounts = $result->count();
+
         $response = [
             'success' => true,
-            'collegeCount'=> $collegCounts,
-            'colleges'=> $result,
+            'collegeCount' => $collegCounts,
+            'colleges' => $result,
         ];
         return response()->json($response, 200);
-      
 
+
+    }
+
+
+    //get college with preferences
+
+    public function getPreferedCollege(Request $request)
+    {
+
+        $user = $request->user();
+
+        $colleges = Universitys::query();
+
+        $preference = Preference::where('student_id', $user['id'])->first();
+
+        if ($preference) {
+            $colleges->where('collegeName', $preference['college_preference_1'])->orWhere('collegeName', $preference['college_preference_2'])->orWhere('collegeName', $preference['college_preference_3'])->orWhere('address', $preference['address_preference_1']);
+
+
+
+
+            if ($keyword = $request->input('keyword')) {
+                $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'")
+                ;
+            }
+
+            $preferedcollege = $colleges->get();
+            $response = [
+
+                'success' => false,
+                'preferedCollege' => $preferedcollege
+            ];
+            return response()->json($response, 200);
+        }
+
+
+        $response = [
+            'success' => false,
+            'message' => 'No college found'
+        ];
+        return response()->json($response, 200);
     }
 
     //get all college for --admin
@@ -143,16 +175,16 @@ class UniversityController extends Controller
                 'success' => false,
                 'message' => "college not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $course = DB::table('courses')->where('college_id', $college['id'])->get();
 
-        if(!$course){
+        if (!$course) {
             $response = [
                 'success' => false,
                 'message' => "course not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $response = [
@@ -197,15 +229,15 @@ class UniversityController extends Controller
                 'success' => false,
                 'message' => "college not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         $course = DB::table('courses')->where('college_id', $college['id'])->get();
-      if (!$course) {
+        if (!$course) {
             $response = [
                 'success' => false,
                 'message' => "course not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
         $response = [
@@ -231,7 +263,7 @@ class UniversityController extends Controller
                 'success' => false,
                 'message' => "college not found"
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
         ;
 
