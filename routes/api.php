@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/register/personalDetails', [StudentDetails::class, 'RegisterStudentPersonalDetails']);
     Route::get('/personalDetails', [StudentDetails::class, 'getStudentPersonalDetails']);
     Route::post('/register/educationalDetails', [StudentDetails::class, 'registerStudentEducationalDetails']);
+    Route::get('/get/educationalDetails', [StudentDetails::class, 'GetStudentEducation']);
     Route::post('/register/address', [StudentDetails::class, 'registerStudentAddress']);
     Route::get('/get/address', [StudentDetails::class, 'getStudentAddress']);
 });

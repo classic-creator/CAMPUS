@@ -122,7 +122,7 @@ class StudentDetails extends Controller
             'class12_no' => 'required',
             'class12_board' => 'required',
             'class12_college' => 'required',
-            'class12_stream' => 'required',
+            'class12_strem' => 'required',
             'class12_totalMark' => 'required',
             'class12_markObtain' => 'required',
         ]);
@@ -169,6 +169,34 @@ class StudentDetails extends Controller
 
     }
 
+    //get educetional details 
+
+
+    public function GetStudentEducation(Request $request){
+
+        $user=$request->user();
+
+        $studenteducation = StudentEducationalDetails::where('student_id', $user['id'])->latest('created_at')->first();
+
+        if (!$studenteducation) {
+
+            $response = [
+                'success' => false,
+                'message' => 'please enter details'
+            ];
+
+            return response()->json($response, 404);
+        }
+
+
+        $response = [
+            'success' => true,
+            'studentEducation' => $studenteducation
+        ];
+
+        return response()->json($response, 200);
+
+    }
     //student Address
 
     public function registerStudentAddress(Request $request) {
