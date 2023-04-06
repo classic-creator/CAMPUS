@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\StudentPersonalDetails;
+use App\Models\Address;
+use App\Models\StudentEducationalDetails;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 class UserController extends Controller
@@ -178,4 +181,15 @@ public function updateUsersAdmin(Request $request,$id){
     return response()->json($response,200);
 
 }
+
+
+//add student details
+
+
+
+
+
+
+
+
 }

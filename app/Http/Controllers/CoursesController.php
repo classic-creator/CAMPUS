@@ -142,15 +142,6 @@ class CoursesController extends Controller
     
                 $preferCourses=$course->get();
         
-                if(!$preferCourses){
-        
-                    $response = [
-                        'success' => false,
-                        'message' => 'No courses found'
-                    ];
-                    return response()->json($response, 200);
-                }
-        
                 $response = [
                     'success' => true,
                     'preferCourses' => $preferCourses,
@@ -186,7 +177,7 @@ class CoursesController extends Controller
                 'success' => false,
                 'message' => 'course not found'
             ];
-            return response()->json($response, 200);
+            return response()->json($response, 404);
         }
 
         $response = [

@@ -4,6 +4,7 @@ use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PreferenceController;
+use App\Http\Controllers\StudentDetails;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails'])
 
 //login protected routes
 Route::middleware(['auth:sanctum'])->group(function(){
-   
+    
     Route::get('/preference/courses',[CoursesController::class,'getPreferedCourses']);
     Route::post('/logout',[UserController::class,'logout']);
     Route::get('/getProfile',[UserController::class,'getProfile']);
@@ -44,6 +45,13 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/collegeregister', [UniversityController::class, 'registerCollege']);
     Route::post('/apply/course/{id}', [AdmissionController::class, 'applyAdmission']);
     Route::post('/add/preference', [PreferenceController::class, 'addPreference']);
+    Route::get('/get/preference', [PreferenceController::class, 'getPreferences']);
+    Route::post('/update/preference', [PreferenceController::class, 'updatePreference']);
+    Route::post('/register/personalDetails', [StudentDetails::class, 'RegisterStudentPersonalDetails']);
+    Route::get('/personalDetails', [StudentDetails::class, 'getStudentPersonalDetails']);
+    Route::post('/register/educationalDetails', [StudentDetails::class, 'registerStudentEducationalDetails']);
+    Route::post('/register/address', [StudentDetails::class, 'registerStudentAddress']);
+    Route::get('/get/address', [StudentDetails::class, 'getStudentAddress']);
 });
 
 // admin protected routes

@@ -17,6 +17,13 @@ class AdmissionController extends Controller
     {
 
         $user = $request->user();
+
+
+        
+
+
+
+
         $course = Courses::where('id', $id)->first();
         if (!$course) {
             $response = [
@@ -64,6 +71,7 @@ class AdmissionController extends Controller
         $user = $request->user();
         
         $college = Universitys::where('create-by', $user['id'])->first();
+
         if(!$college){
             $response = [
                 'success' => false,
