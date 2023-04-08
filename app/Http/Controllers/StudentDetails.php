@@ -165,7 +165,7 @@ class StudentDetails extends Controller
             'message' => 'register Student Educational Data Successfully'
         ];
 
-        return response()->json($response, 200);
+        return response()->json($response, 201);
 
     }
 

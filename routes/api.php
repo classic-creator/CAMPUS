@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/get/educationalDetails', [StudentDetails::class, 'GetStudentEducation']);
     Route::post('/register/address', [StudentDetails::class, 'registerStudentAddress']);
     Route::get('/get/address', [StudentDetails::class, 'getStudentAddress']);
+    Route::get('/get/applications', [AdmissionController::class, 'getMyapplications']);
 });
 
 // admin protected routes

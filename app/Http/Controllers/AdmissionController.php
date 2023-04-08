@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\Courses;
+use App\Models\StudentEducationalDetails;
+use App\Models\StudentPersonalDetails;
 use App\Models\Universitys;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -18,12 +21,6 @@ class AdmissionController extends Controller
 
         $user = $request->user();
 
-
-        
-
-
-
-
         $course = Courses::where('id', $id)->first();
         if (!$course) {
             $response = [
@@ -31,12 +28,14 @@ class AdmissionController extends Controller
                 'message' => "course not found",
             ];
             return response()->json($response, 200);
-
         }
 
         $college = Universitys::where('id', $course['college_id'])->first();
+        $personalDetails=StudentPersonalDetails::where('student_id', $user['id'])->latest('created_at')->first();
+        $educationalDetails=StudentEducationalDetails::where('student_id', $user['id'])->latest('created_at')->first();
+        $studentAddress = Address::where('user_id', $user['id'])->latest('created_at')->first();
 
-        $admissionRecord = Admission::where('courseId', $id)->where('studentId', $user['id'])->first();
+        $admissionRecord = Admission::where('course_id', $id)->where('student_id', $user['id'])->first();
 
         if ($admissionRecord) {
             $response = [
@@ -47,23 +46,57 @@ class AdmissionController extends Controller
 
         }
 
-        $admission = Admission::create([
-            'studentId' => $user['id'],
-            'courseId' => $course['id'],
-            'collegeId' => $college['id'],
+      Admission::create([
+            'student_id' => $user['id'],
+            'course_id' => $course['id'],
+            'college_id' => $college['id'],
+            'personalDetails_id'=>$personalDetails['id'],
+            'educationalDetails_id'=>$educationalDetails['id'],
+            'address_id'=>$studentAddress['id'],
             // 'payment_status'=>$request->payment_status,
             // 'admission_status'=>$request->admission_status
         ]);
         $response = [
 
             'success' => true,
-            'message' => "apply successfully",
-            $admission,
+            'msg' => "apply successfully",
+            
         ];
         return response()->json($response, 201);
     }
 
-    //get all admission request
+
+    //get admission request for users
+
+
+ public function getMyapplications(Request $request)
+    {
+
+        $user = $request->user();
+    
+
+        $applications = DB::table('admissions')->select('admissions.id','admissions.admission_status','admissions.payment_status','users.name','courses.courseName','universitys.collegeName','universitys.address',) ->join('universitys', 'universitys.id', '=', 'admissions.college_id') ->join('courses', 'courses.id', '=', 'admissions.course_id')->join('users', 'users.id', '=', 'admissions.student_id')->where('student_id', $user['id'])->get();
+
+        if(!$applications){
+            $response = [
+                'success' => true,
+               'applications'=> $applications,
+    
+            ];
+            return response()->json($response, 200);
+        }
+
+        $response = [
+            'success' => true,
+           'applications'=> $applications,
+
+        ];
+        return response()->json($response, 200);
+    }
+
+
+
+    //get all admission request for college
 
     public function getAdmission(Request $request)
     {
@@ -80,7 +113,7 @@ class AdmissionController extends Controller
             return response()->json($response, 200);
         }
 
-        $admissions = DB::table('admissions')->where('collegeId', $college['id'])->get();
+        $admissions = DB::table('admissions')->where('college_id', $college['id'])->get();
 
         $response = [
             'success' => true,

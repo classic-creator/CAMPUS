@@ -10,9 +10,12 @@ class Admission extends Model
     use HasFactory;
 
     protected $fillable = [
-       'studentId',
-       'collegeId',
-       'courseId',
+       'student_id',
+       'college_id',
+       'course_id',
+       'personalDetails_id',
+       'educationalDetails_id',
+       'address_id',
        'payment_status',
        'admission_status'
        
