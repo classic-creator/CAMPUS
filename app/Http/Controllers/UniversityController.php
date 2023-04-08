@@ -71,7 +71,7 @@ class UniversityController extends Controller
 
             'success' => true,
             'message' => "registration success",
-            $college,
+           'college'=>$college
 
         ];
         return response()->json($response, 201);
@@ -214,7 +214,7 @@ class UniversityController extends Controller
         }
         $response = [
             'success' => true,
-            $college
+           'myCollege'=> $college
         ];
         return response()->json($response, 200);
     }
