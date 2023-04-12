@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Courses;
+use App\Models\Depertment;
 use App\Models\Preference;
 use App\Models\Universitys;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class CoursesController extends Controller
 {
     //register  course
-    public function courseRegister(Request $request)
+    public function courseRegister(Request $request ,$id)
     {
 
         $validator = Validator::make($request->all(), [
@@ -35,12 +36,13 @@ class CoursesController extends Controller
         $user = $request->user();
 
         $college = Universitys::where('create-by', $user['id'])->first();
+        $depertment=Depertment::where('id',$id)->first();
 
-        if (!$college) {
+        if (!$college && !$depertment) {
             $response = [
 
                 'success' => false,
-                'message' => "Add your college first",
+                'message' => "Add your college/depertment first",
 
             ];
             return response()->json($response, 200);
@@ -52,6 +54,7 @@ class CoursesController extends Controller
             'duration' => $request->duration,
             'eligibility' => $request->eligibility,
             'college_id' => $college['id'],
+            'depertment_id'=>$depertment['id']
         ]);
 
 
@@ -59,8 +62,7 @@ class CoursesController extends Controller
 
             'success' => true,
             'message' => "Course registration success",
-            $college['collegeName'],
-            $course
+              'course'=> $course
         ];
         return response()->json($response, 201);
     }
@@ -188,9 +190,9 @@ class CoursesController extends Controller
 
     }
 
-    // get course details for authorize user (manager/collegestuff)
+    // get course  for authorize user (manager/collegestuff)
 
-    public function getCourseDetailsForStuff(Request $request)
+    public function getCourseDetailsForStaff(Request $request)
     {
 
         $user = $request->user();
@@ -219,21 +221,45 @@ class CoursesController extends Controller
 
     }
 
+    //get courses for depertments
+
+    public function getDepertmentCourses(Request $request,$id)
+    {
+
+      $depertment = Depertment::where('id', $id)->first();
+        if (!$depertment) {
+            $response = [
+                'success' => false,
+                'message' => 'depertment not found'
+            ];
+            return response()->json($response, 200);
+        }
+        $courses = DB::table('courses')->where('depertment_id', $depertment['id'])->get();
+
+        if (!$courses) {
+            $response = [
+                'success' => false,
+                'message' => 'course not found'
+            ];
+            return response()->json($response, 200);
+        }
+        $response = [
+            'success' => true,
+             'courses'=> $courses
+        ];
+        return response()->json($response, 200);
+
+    }
+
+
     // update course details
 
     public function updateCourseDetails(Request $request, $id)
     {
 
         $user = $request->user();
-        $college = Universitys::where('create-by', $user['id'])->first();
-        if (!$college) {
-            $response = [
-                'success' => false,
-                'message' => 'college not found'
-            ];
-            return response()->json($response, 200);
-        }
-        $course = Courses::where('id', $id)->where('college_id', $college['id'])->first();
+       
+        $course = Courses::where('id', $id)->first();
         // $course = DB::table('courses')->find($courseid);
 
         if (!$course) {
@@ -273,7 +299,7 @@ class CoursesController extends Controller
 
         $response = [
             'success' => true,
-            $course,
+            'course'=> $course,
 
         ];
         return response()->json($response, 200);

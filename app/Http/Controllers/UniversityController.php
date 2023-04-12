@@ -212,9 +212,19 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 200);
         }
+        $courses = DB::table('courses')->where('college_id', $college['id'])->get();
+
+        if (!$courses) {
+            $response = [
+                'success' => false,
+                'message' => "course not found"
+            ];
+            return response()->json($response, 200);
+        }
         $response = [
             'success' => true,
-           'myCollege'=> $college
+           'myCollege'=> $college,
+           'myCourses'=>$courses
         ];
         return response()->json($response, 200);
     }

@@ -7,6 +7,7 @@ use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\StudentDetails;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DepertmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -72,16 +73,19 @@ Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
 // manager protected routes
 Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     
-    Route::put('/college/stuff/update', [UniversityController::class, 'updateCollegeDetails']);
-    Route::get('/college/stuff/profile',[UniversityController::class,'getMyCollegeDetails']);
-    Route::delete('/college/stuff/delete', [UniversityController::class, 'deleteCollege']);
-    Route::post('/college/course/register', [CoursesController::class, 'courseRegister']);
-    Route::get('/college/stuff/course/details', [CoursesController::class, 'getCourseDetailsForStuff']);
-    Route::put('/college/stuff/course/{id}', [CoursesController::class, 'updateCourseDetails']);
-    Route::delete('/college/stuff/course/{id}', [CoursesController::class, 'deleteCourse']);
-    Route::get('/college/stuff/admissions', [AdmissionController::class, 'getAdmission']);
-    Route::get('/college/stuff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
-    Route::put('/college/stuff/admission/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
+    Route::put('/college/staff/update', [UniversityController::class, 'updateCollegeDetails']);
+    Route::get('/college/staff/profile',[UniversityController::class,'getMyCollegeDetails']);
+    Route::delete('/college/staff/delete', [UniversityController::class, 'deleteCollege']);
+    Route::post('/college/course/register/{id}', [CoursesController::class, 'courseRegister']);
+    Route::get('/college/staff/course/details', [CoursesController::class, 'getCourseDetailsForstaff']);
+    Route::put('/college/staff/course/{id}', [CoursesController::class, 'updateCourseDetails']);
+    Route::delete('/college/staff/course/{id}', [CoursesController::class, 'deleteCourse']);
+    Route::get('/college/staff/admissions', [AdmissionController::class, 'getAdmission']);
+    Route::get('/college/staff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
+    Route::put('/college/staff/admission/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
+    Route::post('/college/create/depertment', [DepertmentController::class, 'createDepertment']);
+    Route::get('/get/depertments', [DepertmentController::class, 'getDepertments']);
+    Route::get('/depertment/course/{id}', [CoursesController::class, 'getDepertmentCourses']);
 });
 
 
