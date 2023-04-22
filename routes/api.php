@@ -82,10 +82,11 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::delete('/college/staff/course/{id}', [CoursesController::class, 'deleteCourse']);
     Route::get('/college/staff/admissions', [AdmissionController::class, 'getAdmission']);
     Route::get('/college/staff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
-    Route::put('/college/staff/admission/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
+    Route::put('/application/update/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
     Route::post('/college/create/depertment', [DepertmentController::class, 'createDepertment']);
     Route::get('/get/depertments', [DepertmentController::class, 'getDepertments']);
     Route::get('/depertment/course/{id}', [CoursesController::class, 'getDepertmentCourses']);
+    Route::get('/course/applications/{id}', [AdmissionController::class, 'getCourseApplication']);
 });
 
 

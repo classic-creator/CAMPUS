@@ -122,7 +122,31 @@ class AdmissionController extends Controller
         ];
         return response()->json($response, 200);
     }
+  //get applications for course 
 
+  public function getCourseApplication(Request $request,$id)
+    {
+
+        
+        $course = Courses::where('id', $id)->first();
+
+        if(!$course){
+            $response = [
+                'success' => false,
+                'message'=>'college not found'
+            ];
+            return response()->json($response, 200);
+        }
+
+        // $applications = DB::table('admissions')->where('course_id', $id)->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->get();
+        $applications = DB::table('admissions')->where('course_id', $id)->select('admissions.id as id','admissions.admission_status','admissions.payment_status' ,'users.name','universitys.collegeName','courses.courseName','student_educational_details.*','student_personal_data.dob')->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->get();
+        $response = [
+            'success' => true,
+           'applications'=> $applications,
+
+        ];
+        return response()->json($response, 200);
+    }
 
     //get admission details
     public function getAdmissionDetails(Request $request, $id)
@@ -165,20 +189,7 @@ class AdmissionController extends Controller
 
     public function updateAdmissionStatus(Request $request, $id)
     {
-        $user = $request->user();
-
-        $college = Universitys::where('create-by', $user['id'])->first();
-
-        if(!$college){
-            $response = [
-                'success' => false,
-                'message'=>'not found'
-
-            ];
-            return response()->json($response, 200);
-        }
-
-        $admission = Admission::where('id', $id)->where('collegeId',$college['id'])->first();
+        $admission = Admission::where('id', $id)->first();
 
         if(!$admission){
             $response = [
@@ -209,9 +220,9 @@ class AdmissionController extends Controller
 
         $response = [
             'success' => true,
-            $admission
+           'message'=>'Update status successfully'
         ];
-        return response()->json($response, 400);
+        return response()->json($response, 200);
     }
 
 }
