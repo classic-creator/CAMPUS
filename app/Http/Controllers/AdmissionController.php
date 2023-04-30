@@ -23,18 +23,19 @@ class AdmissionController extends Controller
 
         $user = $request->user();
 
-        $course = Courses::where('id', $id)->first();
-        if (!$course) {
-            $response = [
-                'success' => false,
-                'message' => "course not found",
-            ];
-            return response()->json($response, 200);
-        }
+        $course = Courses::findOrFail( $id);
+        
+        // if (!$course) {
+        //     $response = [
+        //         'success' => false,
+        //         'message' => "course not found",
+        //     ];
+        //     return response()->json($response, 200);
+        // }
 
         $college = Universitys::where('id', $course['college_id'])->first();
-        $personalDetails=StudentPersonalDetails::where('student_id', $user['id'])->latest('created_at')->first();
-        $educationalDetails=StudentEducationalDetails::where('student_id', $user['id'])->latest('created_at')->first();
+        $personalDetails = StudentPersonalDetails::where('student_id', $user['id'])->latest('created_at')->first();
+        $educationalDetails = StudentEducationalDetails::where('student_id', $user['id'])->latest('created_at')->first();
         $studentAddress = Address::where('user_id', $user['id'])->latest('created_at')->first();
 
         $admissionRecord = Admission::where('course_id', $id)->where('student_id', $user['id'])->first();
@@ -48,13 +49,13 @@ class AdmissionController extends Controller
 
         }
 
-      Admission::create([
+        Admission::create([
             'student_id' => $user['id'],
             'course_id' => $course['id'],
             'college_id' => $college['id'],
-            'personalDetails_id'=>$personalDetails['id'],
-            'educationalDetails_id'=>$educationalDetails['id'],
-            'address_id'=>$studentAddress['id'],
+            'personalDetails_id' => $personalDetails['id'],
+            'educationalDetails_id' => $educationalDetails['id'],
+            'address_id' => $studentAddress['id'],
             // 'payment_status'=>$request->payment_status,
             // 'admission_status'=>$request->admission_status
         ]);
@@ -62,7 +63,7 @@ class AdmissionController extends Controller
 
             'success' => true,
             'msg' => "apply successfully",
-            
+
         ];
         return response()->json($response, 201);
     }
@@ -71,26 +72,26 @@ class AdmissionController extends Controller
     //get admission request for users
 
 
- public function getMyapplications(Request $request)
+    public function getMyapplications(Request $request)
     {
 
         $user = $request->user();
-    
 
-        $applications = DB::table('admissions')->select('admissions.id','admissions.admission_status','admissions.payment_status','users.name','courses.courseName','universitys.collegeName','universitys.address',) ->join('universitys', 'universitys.id', '=', 'admissions.college_id') ->join('courses', 'courses.id', '=', 'admissions.course_id')->join('users', 'users.id', '=', 'admissions.student_id')->where('student_id', $user['id'])->get();
 
-        if(!$applications){
+        $applications = DB::table('admissions')->select('admissions.id', 'admissions.admission_status', 'admissions.payment_status', 'users.name', 'courses.courseName', 'universitys.collegeName', 'universitys.address', )->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('users', 'users.id', '=', 'admissions.student_id')->where('student_id', $user['id'])->get();
+
+        if (!$applications) {
             $response = [
                 'success' => true,
-               'applications'=> $applications,
-    
+                'applications' => $applications,
+
             ];
             return response()->json($response, 200);
         }
 
         $response = [
             'success' => true,
-           'applications'=> $applications,
+            'applications' => $applications,
 
         ];
         return response()->json($response, 200);
@@ -104,13 +105,13 @@ class AdmissionController extends Controller
     {
 
         $user = $request->user();
-        
+
         $college = Universitys::where('create-by', $user['id'])->first();
 
-        if(!$college){
+        if (!$college) {
             $response = [
                 'success' => false,
-                'message'=>'college not found'
+                'message' => 'college not found'
             ];
             return response()->json($response, 200);
         }
@@ -124,27 +125,37 @@ class AdmissionController extends Controller
         ];
         return response()->json($response, 200);
     }
-  //get applications for course 
+    //get applications for course 
 
-  public function getCourseApplication(Request $request,$id)
+    public function getCourseApplication(Request $request, $id)
     {
 
-        
-        $course = Courses::where('id', $id)->first();
 
-        if(!$course){
+        // $course = Courses::where('id', $id)->first();
+        // $course = Courses::findOrFail($id);
+
+        // if(!$course){
+        //     $response = [
+        //         'success' => false,
+        //         'message'=>'college not found'
+        //     ];
+        //     return response()->json($response, 200);
+        // }
+
+
+        $applications = DB::table('admissions')->where('course_id', $id)->select('admissions.id as id', 'admissions.admission_status', 'admissions.payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.dob','student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name','addresses.circle_office')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
+        if ($applications->isEmpty()) {
             $response = [
                 'success' => false,
-                'message'=>'college not found'
+                'applications' => $applications,
+
             ];
             return response()->json($response, 200);
         }
 
-        // $applications = DB::table('admissions')->where('course_id', $id)->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->get();
-        $applications = DB::table('admissions')->where('course_id', $id)->select('admissions.id as id','admissions.admission_status','admissions.payment_status' ,'users.name','universitys.collegeName','courses.courseName','student_educational_details.class10_board','student_personal_data.dob')->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->get();
         $response = [
             'success' => true,
-           'applications'=> $applications,
+            'applications' => $applications,
 
         ];
         return response()->json($response, 200);
@@ -155,18 +166,26 @@ class AdmissionController extends Controller
     {
 
 
-        $application = Admission::select('admissions.id as id','admissions.admission_status','admissions.payment_status' ,'users.name','universitys.collegeName','courses.courseName','student_educational_details.class10_board','student_educational_details.class10_school','student_educational_details.class10_roll','student_educational_details.class10_no','student_educational_details.class10_totalMark','student_educational_details.class10_markObtain','student_educational_details.class12_college','student_educational_details.class12_strem','student_educational_details.class12_board','student_educational_details.class12_totalMark','student_educational_details.class12_markObtain','student_educational_details.class12_roll','student_educational_details.class12_no','student_personal_data.email','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.mark_obtain_lastExam','student_personal_data.qualification')->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->where('admissions.id',$id)->first();
+        $application = Admission::select('admissions.id as id', 'admissions.admission_status', 'admissions.payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_educational_details.class10_school', 'student_educational_details.class10_roll', 'student_educational_details.class10_no', 'student_educational_details.class10_totalMark', 'student_educational_details.class10_markObtain', 'student_educational_details.class12_college', 'student_educational_details.class12_strem', 'student_educational_details.class12_board', 'student_educational_details.class12_totalMark', 'student_educational_details.class12_markObtain', 'student_educational_details.class12_roll', 'student_educational_details.class12_no', 'student_personal_data.email', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.qualification')
+            ->join('users', 'users.id', '=', 'admissions.student_id')
+            ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->join('courses', 'courses.id', '=', 'admissions.course_id')
+            ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+            ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+            ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+            ->where('admissions.id', $id)
+            ->first();
 
         if ($application) {
 
             $response = [
                 'success' => true,
-              'application'=>  $application,
+                'application' => $application,
 
             ];
             return response()->json($response, 200);
         }
-    
+
         $response = [
             'success' => false,
             'message' => 'not found'
@@ -179,16 +198,9 @@ class AdmissionController extends Controller
 
     public function updateAdmissionStatus(Request $request, $id)
     {
-        $admission = Admission::where('id',$id)->first();
 
-        if(!$admission){
-            $response = [
-                'success' => false,
-                'message'=>'not found'
 
-            ];
-            return response()->json($response, 404);
-        }
+        $admission = Admission::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
 
@@ -204,53 +216,54 @@ class AdmissionController extends Controller
         }
         ;
 
-        $admission->admission_status = $request->admission_status;
 
-        $admission->save();
+        $admission->update(['admission_status' => $request->admission_status]);
 
-        if($request->admission_status=='Selected'){
+        if ($request->admission_status == 'Selected') {
 
-        $StudentDetails=StudentPersonalDetails::where('id',$admission['personalDetails_id'])->first();
-        $email=$StudentDetails['email'];
+            $StudentDetails = StudentPersonalDetails::where('id', $admission['personalDetails_id'])->first();
+            $email = $StudentDetails['email'];
 
-        $course=Courses::where('id',$admission['course_id'])->first();
-        $course_name=$course['courseName'];
+            $course = Courses::where('id', $admission['course_id'])->first();
+            $course_name = $course['courseName'];
 
-        $college=Universitys::where('id',$admission['college_id'])->first();
-        $college_name=$college['collegeName'];
+            $college = Universitys::where('id', $admission['college_id'])->first();
+            $college_name = $college['collegeName'];
 
-        Mail::send('selected',['course_name'=>$course_name,'college_name'=>$college_name],function(Message $message)use($email){
-            $message->subject('Your Application Accept');
-            $message->to($email);
+            Mail::send('selected', ['course_name' => $course_name, 'college_name' => $college_name], function (Message $message) use ($email) {
+                $message->subject('Your Application Accept');
+                $message->to($email);
 
-         
-        });
-    }
+
+            });
+        }
+
+
         $response = [
             'success' => true,
-           'message'=>'Update status successfully'
+            'message' => 'Update status successfully'
         ];
         return response()->json($response, 200);
     }
 
     //get Selected Applications
 
-      public function getSelectedApplication(Request $request, $id)
+    public function getSelectedApplication(Request $request, $id)
     {
 
 
-      $application=Admission::where(['course_id'=>$id,'admission_status'=>'Selected'])->select('admissions.id as id','admissions.admission_status','admissions.payment_status' ,'users.name','universitys.collegeName','courses.courseName','student_educational_details.class10_board','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name')->join('users','users.id','=','admissions.student_id')->join('universitys','universitys.id','=','admissions.college_id')->join('courses','courses.id','=','admissions.course_id')->join('addresses','addresses.id','=','admissions.address_id')->join('student_educational_details','student_educational_details.id','=','admissions.educationalDetails_id')->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')->get();
+        $application = Admission::where(['course_id' => $id, 'admission_status' => 'Selected'])->select('admissions.id as id', 'admissions.admission_status', 'admissions.payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
 
         if ($application) {
 
             $response = [
                 'success' => true,
-              'SelectedApplication'=>  $application,
+                'SelectedApplication' => $application,
 
             ];
             return response()->json($response, 200);
         }
-    
+
         $response = [
             'success' => false,
             'message' => 'not found'
@@ -259,5 +272,62 @@ class AdmissionController extends Controller
         return response()->json($response, 200);
 
     }
+    // admission fee payment 
 
+
+public function AdmissionPayment(Request $request, $id)
+    {
+
+
+        $admission = Admission::findOrFail($id);
+
+      
+
+
+        $admission->update(['payment_status' => 'paid']);
+        
+      $course=  Courses::where('id',$admission['course_id'])->first();
+
+        $course->seat_capacity= $course->seat_capacity-1;
+
+        $course->save();
+
+   
+
+
+        $response = [
+            'success' => true,
+            'message' => 'Update status successfully'
+        ];
+        return response()->json($response, 200);
+    }
+    //get Confirm Applications
+
+    public function getConfirmStudentList(Request $request, $id)
+    {
+
+
+        $ConfirmStudent = Admission::where(['course_id' => $id, 'payment_status' => 'paid'])->select('admissions.id as id', 'admissions.admission_status', 'admissions.payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
+
+        if ($ConfirmStudent) {
+
+            $response = [
+                'success' => true,
+                'ConfirmStudent' => $ConfirmStudent,
+
+            ];
+            return response()->json($response, 200);
+        }
+
+
+
+
+        $response = [
+            'success' => false,
+            'message' => 'not found'
+
+        ];
+        return response()->json($response, 200);
+
+    }
 }

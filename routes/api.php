@@ -55,6 +55,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/register/address', [StudentDetails::class, 'registerStudentAddress']);
     Route::get('/get/address', [StudentDetails::class, 'getStudentAddress']);
     Route::get('/get/applications', [AdmissionController::class, 'getMyapplications']);
+    Route::get('/admission/payment/{id}', [AdmissionController::class, 'AdmissionPayment']);
 });
 
 // admin protected routes
@@ -88,6 +89,7 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::get('/depertment/course/{id}', [CoursesController::class, 'getDepertmentCourses']);
     Route::get('/course/applications/{id}', [AdmissionController::class, 'getCourseApplication']);
     Route::get('/course/selected/application/{id}', [AdmissionController::class, 'getSelectedApplication']);
+    Route::get('/course/confirm/student/{id}', [AdmissionController::class, 'getConfirmStudentList']);
 });
 
 

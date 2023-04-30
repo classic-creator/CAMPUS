@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admission;
 use App\Models\Courses;
 use App\Models\Depertment;
 use App\Models\Preference;
@@ -22,6 +23,7 @@ class CoursesController extends Controller
             'fees' => 'required|numeric',
             'duration' => 'required',
             'eligibility' => 'required',
+            'seat_capacity'=>'required'
 
         ]);
         if ($validator->fails()) {
@@ -53,6 +55,7 @@ class CoursesController extends Controller
             'fees' => $request->fees,
             'duration' => $request->duration,
             'eligibility' => $request->eligibility,
+            'seat_capacity' => $request->seat_capacity,
             'college_id' => $college['id'],
             'depertment_id'=>$depertment['id']
         ]);
@@ -170,7 +173,7 @@ class CoursesController extends Controller
         // $course = Courses::where('id', $id)->first();
 
         $course = DB::table('courses')
-        ->select('courses.id','universitys.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
+        ->select('courses.id','universitys.id','courses.courseName','courses.seat_capacity', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
         ->join('universitys', 'universitys.id', '=', 'courses.college_id')->where('courses.id', $id)->first();
 
 
@@ -201,6 +204,7 @@ class CoursesController extends Controller
       
        
         $courses = DB::table('courses')->where('college_id', $college['id'])->get();
+    //   $application=Admission::get();
 
         if (!$courses) {
             $response = [
@@ -211,7 +215,8 @@ class CoursesController extends Controller
         }
         $response = [
             'success' => true,
-          'courses'=>  $courses
+          'courses'=>  $courses,
+
         ];
         return response()->json($response, 200);
 
@@ -273,6 +278,7 @@ class CoursesController extends Controller
             'fees' => 'required',
             'duration' => 'required',
             'eligibility' => 'required',
+            'seat_capacity'=>'required'
         ]);
         if ($validator->fails()) {
             $response = [
@@ -288,6 +294,7 @@ class CoursesController extends Controller
             "fees" => $request->input('fees'),
             "duration" => $request->input('duration'),
             "eligibility" => $request->input('eligibility'),
+            "seat_capacity" => $request->input('seat_capacity'),
         ]);
 
 

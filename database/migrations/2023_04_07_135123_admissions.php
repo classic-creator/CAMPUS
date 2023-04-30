@@ -33,7 +33,7 @@ return new class extends Migration
             $table->foreign('address_id')->references('id')->on('addresses');
 
             $table->string('admission_status')->default('under-review');
-            $table->string('payment_status')->default('panding');
+            $table->string('payment_status')->default('pending');
 
             $table->timestamps();
         });

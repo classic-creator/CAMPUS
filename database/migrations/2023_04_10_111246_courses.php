@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('fees');
             $table->string('duration');
             $table->string('eligibility');
+            $table->string('seat_capacity');
             $table->unsignedBigInteger('college_id');
             $table->foreign('college_id')->references('id')->on('universitys');
             $table->unsignedBigInteger('depertment_id');
