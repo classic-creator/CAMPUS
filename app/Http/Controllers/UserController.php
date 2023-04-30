@@ -43,7 +43,7 @@ public function register(Request $request){
         'success'=>true,
         'message'=>"registration success",
         'token'=>$token,
-        'name'=>$user['name']
+        'user'=>$user
     ];
     return response()->json($response,201);
    

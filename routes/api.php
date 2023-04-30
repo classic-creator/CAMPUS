@@ -77,16 +77,17 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::get('/college/staff/profile',[UniversityController::class,'getMyCollegeDetails']);
     Route::delete('/college/staff/delete', [UniversityController::class, 'deleteCollege']);
     Route::post('/college/course/register/{id}', [CoursesController::class, 'courseRegister']);
-    Route::get('/college/staff/course/details', [CoursesController::class, 'getCourseDetailsForstaff']);
+    Route::get('/college/all/courses', [CoursesController::class, 'getCollegeCourses']);
     Route::put('/college/staff/course/{id}', [CoursesController::class, 'updateCourseDetails']);
     Route::delete('/college/staff/course/{id}', [CoursesController::class, 'deleteCourse']);
     Route::get('/college/staff/admissions', [AdmissionController::class, 'getAdmission']);
-    Route::get('/college/staff/admission/{id}', [AdmissionController::class, 'getAdmissionDetails']);
+    Route::get('/application/{id}', [AdmissionController::class, 'getApplicationDetails']);
     Route::put('/application/update/{id}', [AdmissionController::class, 'updateAdmissionStatus']);
     Route::post('/college/create/depertment', [DepertmentController::class, 'createDepertment']);
     Route::get('/get/depertments', [DepertmentController::class, 'getDepertments']);
     Route::get('/depertment/course/{id}', [CoursesController::class, 'getDepertmentCourses']);
     Route::get('/course/applications/{id}', [AdmissionController::class, 'getCourseApplication']);
+    Route::get('/course/selected/application/{id}', [AdmissionController::class, 'getSelectedApplication']);
 });
 
 

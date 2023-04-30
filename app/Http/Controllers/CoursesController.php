@@ -192,18 +192,14 @@ class CoursesController extends Controller
 
     // get course  for authorize user (manager/collegestuff)
 
-    public function getCourseDetailsForStaff(Request $request)
+    public function getCollegeCourses(Request $request)
     {
 
         $user = $request->user();
+
         $college = Universitys::where('create-by', $user['id'])->first();
-        if (!$college) {
-            $response = [
-                'success' => false,
-                'message' => 'college not found'
-            ];
-            return response()->json($response, 200);
-        }
+      
+       
         $courses = DB::table('courses')->where('college_id', $college['id'])->get();
 
         if (!$courses) {
@@ -215,7 +211,7 @@ class CoursesController extends Controller
         }
         $response = [
             'success' => true,
-            $courses
+          'courses'=>  $courses
         ];
         return response()->json($response, 200);
 
