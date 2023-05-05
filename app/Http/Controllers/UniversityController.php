@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admission;
+use App\Models\collegeImage;
 use App\Models\Courses;
 use App\Models\Preference;
 use App\Models\Universitys;
@@ -71,7 +72,7 @@ class UniversityController extends Controller
 
             'success' => true,
             'message' => "registration success",
-           'college'=>$college
+            'college' => $college
 
         ];
         return response()->json($response, 201);
@@ -80,8 +81,13 @@ class UniversityController extends Controller
     //get all college for public
     public function getAllCollege(Request $request)
     {
-        $colleges = Universitys::query();
-       
+        // $colleges = Universitys::join('college_images','college_images.college_id','=','universitys.id')->select('universitys.*','college_images.image_path');
+        $colleges = Universitys::leftJoin('college_images', function ($join) {
+            $join->on('college_images.college_id', '=', 'universitys.id')
+                ->where('college_images.type', '=', 'cover');
+        })
+            ->select('universitys.*', 'college_images.image_path');
+
         if ($keyword = $request->input('keyword')) {
             $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'");
         }
@@ -97,6 +103,15 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 200);
         }
+
+        foreach ($result as $college) {
+            // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
+            $college->image_url = $college->image_path ? url($college->image_path) : null;
+
+
+
+        }
+
         $collegCounts = $result->count();
 
         $response = [
@@ -166,9 +181,27 @@ class UniversityController extends Controller
     //get college details for public
     public function getCollegeDetails(Request $request, $id)
     {
+        $college = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
+            ->select(
+                'universitys.*',
+                'college_images.image_path as cover_image_path',
+                DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
+            )
+            ->where('universitys.id', $id)
+            ->where('college_images.type', 'cover')
+            ->first();
 
 
-        $college = Universitys::where('id', $id)->first();
+
+        // $college = Universitys::Join('college_images', 'college_images.college_id', '=', 'universitys.id')
+        //     ->select('universitys.*', 'college_images.image_path')
+        //     ->where('universitys.id', $id)
+        //     ->first();
+
+
+
+
+
 
         if (!$college) {
             $response = [
@@ -177,20 +210,25 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 200);
         }
-        $course = DB::table('courses')->where('college_id', $college['id'])->get();
+        $course = DB::table('courses')->where('college_id', $college->id)->get();
+        $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
 
-        if (!$course) {
-            $response = [
-                'success' => false,
-                'message' => "course not found"
-            ];
-            return response()->json($response, 200);
+        foreach ($photos as $photo) {
+            // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
+            $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
+
         }
+
+        // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
+        $college->cover_image_url = $college->cover_image_path ? url($college->cover_image_path) : null;
+        $college->logo_image_url = $college->logo_image_path ? url($college->logo_image_path) : null;
+
 
         $response = [
             'success' => true,
             'college' => $college,
-            'courses' => $course
+            'courses' => $course,
+            'photos' => $photos
         ];
         return response()->json($response, 200);
     }
@@ -223,8 +261,8 @@ class UniversityController extends Controller
         }
         $response = [
             'success' => true,
-           'myCollege'=> $college,
-           'myCourses'=>$courses
+            'myCollege' => $college,
+            'myCourses' => $courses
         ];
         return response()->json($response, 200);
     }

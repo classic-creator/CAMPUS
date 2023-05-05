@@ -13,3 +13,7 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/storage/app/college_images
+/storage/app/course_images
+/public/course_images
+/public/college_images

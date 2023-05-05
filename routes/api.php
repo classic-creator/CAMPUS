@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\CollegeImageController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PreferenceController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\StudentDetails;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DepertmentController;
+use App\Http\Controllers\CourseImgController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -90,6 +92,12 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::get('/course/applications/{id}', [AdmissionController::class, 'getCourseApplication']);
     Route::get('/course/selected/application/{id}', [AdmissionController::class, 'getSelectedApplication']);
     Route::get('/course/confirm/student/{id}', [AdmissionController::class, 'getConfirmStudentList']);
+    Route::post('/image/upload/cover', [CourseImgController::class, 'AddCourseCoverImg']);
+    Route::post('/image/upload/other', [CourseImgController::class, 'courseOtherImageUpload']);
+    Route::post('/image/upload/logo', [CourseImgController::class, 'AddCourseLogoImg']);
+    Route::post('/image/college/logo', [CollegeImageController::class, 'AddCollegeLogoImg']);
+    Route::post('/image/college/cover', [CollegeImageController::class, 'AddCollegeCoverImg']);
+    Route::post('/image/college/other', [CollegeImageController::class, 'collegeOtherImageUpload']);
 });
 
 
