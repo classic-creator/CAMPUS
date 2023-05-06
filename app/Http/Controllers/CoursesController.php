@@ -20,16 +20,18 @@ class CoursesController extends Controller
         $validator = Validator::make($request->all(), [
 
             'courseName' => 'required',
-            'fees' => 'required|numeric',
+            'application_fees' => 'required|numeric',
+            'admission_fees' => 'required|numeric',
             'duration' => 'required',
             'eligibility' => 'required',
-            'seat_capacity'=>'required'
+            'seat_capacity'=>'required',
+
 
         ]);
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'message' => $validator->errors()->first()
 
             ];
             return response()->json($response, 200);
@@ -52,7 +54,8 @@ class CoursesController extends Controller
 
         $course = Courses::create([
             'courseName' => $request->courseName,
-            'fees' => $request->fees,
+            'admission_fees' => $request->admission_fees,   
+            'application_fees' => $request->application_fees,
             'duration' => $request->duration,
             'eligibility' => $request->eligibility,
             'seat_capacity' => $request->seat_capacity,
@@ -75,8 +78,8 @@ class CoursesController extends Controller
     {
 
         $course = DB::table('courses')
-            ->select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
-            ->join('universitys', 'universitys.id', '=', 'courses.college_id');
+            ->select('courses.id','courses.courseName', 'universitys.collegeName','depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees','courses.application_fees','courses.seat_capacity','universitys.address')
+            ->join('universitys', 'universitys.id', '=', 'courses.college_id') ->join('depertments', 'depertments.id', '=', 'courses.depertment_id');
 
 
      //search
@@ -113,56 +116,180 @@ class CoursesController extends Controller
 
     //get courses with preference
 
-    public function getPreferedCourses(Request $request){
+//     public function getPreferedCourses(Request $request){
 
-        $user=$request->user();
+//         $user=$request->user();
 
-        $preference=Preference::where("student_id",$user['id'])->first();
+//         $preference=Preference::where("student_id",$user['id'])->first();
 
-        if($preference){
-            // DB::table('courses')
-            $course = Courses::
-            select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
-            ->join('universitys', 'universitys.id', '=', 'courses.college_id')
+//         if($preference){
+//             // DB::table('courses')
+//             $course = Courses::
+//             select('courses.id','courses.courseName', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.admission_fees','courses.application_fees','courses.seat_capacity','universitys.address')
+//             ->join('universitys', 'universitys.id', '=', 'courses.college_id')
             
-             ->where('courses.courseName',$preference['course1'])->orwhere ('courses.courseName',$preference['course2'])->orWhere('courses.courseName',$preference['course3'])
-             // ->orWhere('universitys.address',$preference['address_preference_1'])
-             ;
+//              ->where('courses.courseName',$preference['course1'])->orwhere ('courses.courseName',$preference['course2'])->orWhere('courses.courseName',$preference['course3'])
+//              // ->orWhere('universitys.address',$preference['address_preference_1'])
+//              ;
 
-             
-             if($keyword = $request->input('keyword')) {
-                 $course->where('courseName', 'like', "%{$keyword}%")
-                 ->orWhere('collegeName', 'like', "%{$keyword}%")
-                 ->orWhere('address', 'like',"%{$keyword}%")
-                 ;
-             }
+//              if($course){
+//              if($keyword = $request->input('keyword')) {
+//                  $course->where('courseName', 'like', "%{$keyword}%")
+//                  ->orWhere('collegeName', 'like', "%{$keyword}%")
+//                  ->orWhere('address', 'like',"%{$keyword}%")
+//                  ;
+//              }
 
 
 
-             if($fe =$request->input('fe')){
+//              if($fe =$request->input('fe')){
 
-                $course->orderBy("fees",$fe);
-            }
+//                 $course->orderBy("fees",$fe);
+//             }
     
     
-                $preferCourses=$course->get();
+//                 $preferCourses=$course->get();
         
-                $response = [
-                    'success' => true,
-                    'preferCourses' => $preferCourses,
-                ];
-                return response()->json($response, 200);
+//                 $response = [
+//                     'success' => true,
+//                     'preferCourses' => $preferCourses,
+//                 ];
+//                 return response()->json($response, 200);}
 
 
-        }
+//   $response = [
+//             'success' => false,
+//             'message' => "Please update Preference",
+//         ];
+//         return response()->json($response, 200);
 
+//         }
+
+//         $response = [
+//             'success' => false,
+//             'message' => "Please update Preference",
+//         ];
+//         return response()->json($response, 200);
+
+//     }
+
+public function getPreferedCourses(Request $request)
+{
+    $user = $request->user();
+
+    $preference = Preference::where("student_id", $user['id'])->first();
+
+    if (!$preference) {
         $response = [
             'success' => false,
             'message' => "Please update Preference",
         ];
         return response()->json($response, 200);
-
     }
+    // $course = DB::table('courses')->join('universitys', 'courses.college_id', '=', 'universitys.id')
+    // ->select('courses.*','universitys.collegeName')
+    // ->where(function ($query) use ($preference) {
+    //     $query->where(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course1']))
+    //           ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course2']))
+    //           ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course3']));
+    // })
+    // ->orderBy('id') // Replace "id" with the name of a unique column
+    // ->get();
+  
+  
+    // $course = DB::table('courses')
+    // ->join('universitys', 'courses.college_id', '=', 'universitys.id')
+    // ->select('courses.*', 'universitys.collegeName')
+    // ->where(function ($query) use ($preference) {
+    //     $query->where(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course1']))
+    //         ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course2']))
+    //         ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course3']));
+       
+    // })
+    // ->when(!empty($preference['college1']), function ($query) use ($preference) {
+    //     return $query->where('universitys.collegeName', '=', $preference['college1']);
+    // })  
+    // ->orderBy('courses.id') // Replace "id" with the name of a unique column in the courses table
+    // ->get();
+   
+//success fully run for 2 college
+    // $course = DB::table('courses')
+    // ->join('universitys', 'courses.college_id', '=', 'universitys.id')
+    // ->select('courses.*', 'universitys.collegeName')
+    // ->where(function ($query) use ($preference) {
+    //     $query->where(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course1']))
+    //         ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course2']))
+    //         ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course3']));
+       
+    // })
+    // ->when(!empty($preference['college1']), function ($query) use ($preference) {
+    //     return $query->where('universitys.collegeName', '=', $preference['college1']);
+    // })  
+    // ->when(!empty($preference['college2']), function ($query) use ($preference) {
+    //     return $query->orWhere(function ($query) use ($preference) {
+    //         $query->where('universitys.collegeName', '=', $preference['college2'])
+    //               ->whereIn(DB::raw('LOWER(courseName)'), array_map('strtolower', [
+    //                   $preference['course1'],
+    //                   $preference['course2'],
+    //                   $preference['course3'],
+    //               ]));
+    //     });
+    // })
+    // ->orderBy('courses.id')
+    // ->get();
+
+
+//for 3 college
+$course = DB::table('courses')
+    ->join('universitys', 'courses.college_id', '=', 'universitys.id')
+    ->select('courses.*', 'universitys.collegeName')
+    ->where(function ($query) use ($preference) {
+        $query->where(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course1']))
+            ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course2']))
+            ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course3']));
+    })
+    ->when(!empty($preference['college1']), function ($query) use ($preference) {
+        return $query->where('universitys.collegeName', '=', $preference['college1']);
+    })  
+    ->when(!empty($preference['college2']), function ($query) use ($preference) {
+        return $query->orWhere(function ($query) use ($preference) {
+            $query->where('universitys.collegeName', '=', $preference['college2'])
+                  ->whereIn(DB::raw('LOWER(courseName)'), array_map('strtolower', [
+                      $preference['course1'],
+                      $preference['course2'],
+                      $preference['course3'],
+                  ]));
+        });
+    })
+    ->when(!empty($preference['college3']), function ($query) use ($preference) {
+        return $query->orWhere(function ($query) use ($preference) {
+            $query->where('universitys.collegeName', '=', $preference['college3'])
+                  ->whereIn(DB::raw('LOWER(courseName)'), array_map('strtolower', [
+                      $preference['course1'],
+                      $preference['course2'],
+                      $preference['course3'],
+                  ]));
+        });
+    })
+    ->orderBy('courses.id')
+    ->get();
+
+
+            if(!$course){
+            $response = [
+                'success' => false,
+                'message' => "Failed to fetch preferred courses.",
+            ];
+            return response()->json($response, 500);}
+            
+            $response = [
+                'success' => true,
+                'preferCourses' => $course,
+            ];
+            return response()->json($response, 200);
+        
+}
+
 
     // get course details public
 
@@ -172,9 +299,21 @@ class CoursesController extends Controller
 
         // $course = Courses::where('id', $id)->first();
 
+        // $course = DB::table('courses')
+        // ->select('courses.id','universitys.id','courses.courseName','courses.depertment_id','courses.seat_capacity', 'universitys.collegeName', 'courses.duration', 'courses.eligibility',  'courses.admission_fees','courses.application_fees','courses.seat_capacity','universitys.address')
+        // ->join('universitys', 'universitys.id', '=', 'courses.college_id')->where('courses.id', $id)->first();
         $course = DB::table('courses')
-        ->select('courses.id','universitys.id','courses.courseName','courses.seat_capacity', 'universitys.collegeName', 'courses.duration', 'courses.eligibility', 'courses.fees','universitys.address')
-        ->join('universitys', 'universitys.id', '=', 'courses.college_id')->where('courses.id', $id)->first();
+        ->select('courses.*', 'universitys.address','depertments.depertment_name', 'college_images.image_path as cover_image_path', 
+            DB::raw("(SELECT image_path FROM college_images WHERE college_id = courses.college_id AND type = 'logo') as logo_image_path"))
+        ->join('universitys', 'universitys.id', '=', 'courses.college_id')
+        ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
+        ->leftJoin('college_images', function ($join) {
+            $join->on('college_images.college_id', '=', 'courses.college_id')
+                 ->where('college_images.type', '=', 'cover');
+        })
+        ->where('courses.id', $id)
+        ->first();
+
 
 
         if (!$course) {
@@ -184,7 +323,9 @@ class CoursesController extends Controller
             ];
             return response()->json($response, 404);
         }
-
+        $course->cover_image_url = $course->cover_image_path ? url($course->cover_image_path) : null;
+        $course->logo_image_url = $course->logo_image_path ? url($course->logo_image_path) : null;
+        
         $response = [
             'success' => true,
             'course' => $course
@@ -275,10 +416,12 @@ class CoursesController extends Controller
         $validator = Validator::make($request->all(), [
 
             'courseName' => 'required',
-            'fees' => 'required',
-            'duration' => 'required',
+           
+            'duration' => 'required|numeric',
             'eligibility' => 'required',
-            'seat_capacity'=>'required'
+            'seat_capacity'=>'required',
+            'application_fees' => 'required|numeric',
+            'admission_fees' => 'required|numeric',
         ]);
         if ($validator->fails()) {
             $response = [
@@ -291,10 +434,12 @@ class CoursesController extends Controller
 
         $course->update([
             "courseName" => $request->input('courseName'),
-            "fees" => $request->input('fees'),
+          
             "duration" => $request->input('duration'),
             "eligibility" => $request->input('eligibility'),
             "seat_capacity" => $request->input('seat_capacity'),
+            "application_fees" => $request->input('application_fees'),
+            "admission_fees" => $request->input('admission_fees'),
         ]);
 
 

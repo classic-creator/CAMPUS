@@ -13,7 +13,8 @@ class Courses extends Model
         'courseName',
         'college_id',
         'depertment_id',
-        'fees',
+        'application_fees',
+        'admission_fees',
         'duration',
         'eligibility',
         'seat_capacity'

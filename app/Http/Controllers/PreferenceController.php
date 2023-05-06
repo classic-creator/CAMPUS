@@ -34,9 +34,9 @@ class PreferenceController extends Controller
 
     $validator = Validator::make($request->all(), [
 
-      'college1' => 'required',
-      'course1' => 'required',
-      'address' => 'required',
+      // 'college1' => 'required',
+      // 'course1' => 'required',
+      // 'address' => 'required',
     ]);
     if ($validator->fails()) {
       $response = [
@@ -101,9 +101,9 @@ class PreferenceController extends Controller
 
     $validator = Validator::make($request->all(), [
 
-      'college1' => 'required',
-      'course1' => 'required',
-      'address' => 'required',
+      // 'college1' => 'required',
+      // 'course1' => 'required',
+      // 'depertment1' => 'required',
     ]);
     if ($validator->fails()) {
       $response = [
@@ -124,7 +124,7 @@ class PreferenceController extends Controller
       'depertment1' => $request->input('depertment1'),
       'depertment2' => $request->input('depertment2'),
       'depertment3' => $request->input('depertment3'),
-      'address' => $request->input('address'),
+      // 'address' => $request->input('address'),
 
   ]);
   $preference->save();

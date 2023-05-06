@@ -16,7 +16,7 @@ class DepertmentController extends Controller
         $college=Universitys::where('create-by',$user['id'])->first();
 
         if(!$college){
-       $response=[
+          $response=[
                 'success'=>false,
                 'message'=>'No college found'
             ];
@@ -33,7 +33,7 @@ class DepertmentController extends Controller
            if ($validator->fails()) {
                $response=[
                    'success'=>false,
-                   'message'=>$validator->errors()
+                   'message'=>$validator->errors()->first()
                ];
                return response()->json($response,400);
            } 
@@ -49,7 +49,9 @@ class DepertmentController extends Controller
              
             $response=[
                 'success'=>true,
+                'message'=>'Register Depertment Successfully',
                 'depertment'=>$depertment,
+                
             ];
             return response()->json($response,201);
            
