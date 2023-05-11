@@ -17,3 +17,4 @@ yarn-error.log
 /storage/app/course_images
 /public/course_images
 /public/college_images
+/public/student_files

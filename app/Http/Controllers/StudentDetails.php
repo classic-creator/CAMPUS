@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StudentEducationalDetails;
 use App\Models\StudentPersonalDetails;
 use App\Models\Address;
+use App\Models\StudentsFilesDetails;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -271,5 +272,115 @@ class StudentDetails extends Controller
         return response()->json($response, 200);
 
     }
+    public function ApplyFileUploadController(Request $request){
+        
+        $validator = Validator::make($request->all(), [
 
+            
+            'profile_photo' => 'required|image|max:2048',
+            'signature' => 'required|image|max:2048',
+            'prc' => 'required|image|max:2048',
+            'aadhar' => 'required|image|max:2048',
+            'hslc_admit' => 'required|image|max:2048',
+            'hslc_certificate' => 'required|image|max:2048',
+            'hslc_marksheet' => 'required|image|max:2048',
+            'hslc_registation' => 'required|image|max:2048',
+            'hsslc_admit' => 'required|image|max:2048',
+            'hsslc_certificate' => 'required|image|max:2048',
+            'hsslc_marksheet' => 'required|image|max:2048',
+            'hsslc_registation' => 'required|image|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+            ];
+            return response()->json($response, 400);
+        }
+
+        $user = $request->user();
+
+      
+
+       
+        $profile_photo = $request->file('profile_photo') ->store('student_files');
+        $aadhar = $request->file('aadhar') ->store('student_files');
+        $signature = $request->file('signature') ->store('student_files');
+        $hslc_registation = $request->file('hslc_registation') ->store('student_files');
+        $hslc_marksheet = $request->file('hslc_marksheet') ->store('student_files');
+        $hslc_certificate = $request->file('hslc_certificate') ->store('student_files');
+        $hslc_admit = $request->file('hslc_admit') ->store('student_files');
+        $hsslc_registation = $request->file('hsslc_registation') ->store('student_files');
+        $hsslc_marksheet = $request->file('hsslc_marksheet') ->store('student_files');
+        $hsslc_certificate = $request->file('hsslc_certificate') ->store('student_files');
+        $hsslc_admit = $request->file('hsslc_admit') ->store('student_files');
+    
+        StudentsFilesDetails::create([
+                   'profile_photo'=>$profile_photo,
+                   'aadhar'=>$aadhar,
+                   'signature'=>$signature,
+                   'hslc_registation'=>$hslc_registation,
+                   'hslc_marksheet'=>$hslc_marksheet,
+                   'hslc_certificate'=>$hslc_certificate,
+                   'hslc_admit'=>$hslc_admit,
+                   'hsslc_registation'=>$hsslc_registation,
+                   'hsslc_marksheet'=>$hsslc_marksheet,
+                   'hsslc_certificate'=>$hsslc_certificate,
+                   'hsslc_admit'=>$hsslc_admit,
+                   'student_id'=>$user['id']
+                ]);
+            
+
+            $response = [
+                'success' => true,
+                'message' => "Uploaded file(s) successfully",
+            ];
+            return response()->json($response, 201);
+        } 
+
+    //get applly files 
+
+    
+    public function getApplyFilesController(Request $request)
+    {
+
+
+        $user = $request->user();
+
+        $files = StudentsFilesDetails::where('student_id', $user['id'])->latest('created_at')->first();
+
+        if (!$files) {
+
+            $response = [
+                'success' => false,
+                'message' => 'please enter details'
+            ];
+
+            return response()->json($response, 404);
+        }
+
+        $files->passport_image_url = $files->profile_photo ? url($files->profile_photo) : null;
+        $files->aadhar_image_url = $files->aadhar ? url($files->aadhar) : null;
+        $files->signature_image_url = $files->signature ? url($files->signature) : null;
+        $files->hslc_registation_image_url = $files->hslc_registation ? url($files->hslc_registation) : null;
+        $files->hslc_marksheet_image_url = $files->hslc_marksheet ? url($files->hslc_marksheet) : null;
+        $files->hslc_certificate_image_url = $files->hslc_certificate ? url($files->hslc_certificate) : null;
+        $files->hslc_admit_image_url = $files->hslc_admit ? url($files->hslc_admit) : null;
+        $files->hsslc_registation_image_url = $files->hsslc_registation ? url($files->hsslc_registation) : null;
+        $files->hsslc_marksheet_image_url = $files->hsslc_marksheet ? url($files->hsslc_marksheet) : null;
+        $files->hsslc_certificate_image_url = $files->hsslc_certificate ? url($files->hsslc_certificate) : null;
+        $files->hsslc_admit_image_url = $files->hsslc_admit ? url($files->hsslc_admit) : null;
+
+
+
+        $response = [
+            'success' => true,
+            'studentsFiles' => $files
+        ];
+
+        return response()->json($response, 200);
+
+
+    }
 }

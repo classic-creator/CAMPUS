@@ -199,7 +199,7 @@ class CollegeImageController extends Controller
         return response()->json($response, 400);
     }
 
-    //get colleg logo image
+    //
 
 
 }

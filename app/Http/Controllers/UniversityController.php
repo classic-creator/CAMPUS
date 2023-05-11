@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class UniversityController extends Controller
 {
-    //register College
+    //register College 
     public function registerCollege(Request $request)
     {
 
@@ -108,8 +108,6 @@ class UniversityController extends Controller
             // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
             $college->image_url = $college->image_path ? url($college->image_path) : null;
 
-
-
         }
 
         $collegCounts = $result->count();
@@ -183,25 +181,13 @@ class UniversityController extends Controller
     {
         $college = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
             ->select(
-                'universitys.*',
+                'universitys.id as college_id','universitys.collegeName','universitys.address','universitys.description','universitys.rating',
                 'college_images.image_path as cover_image_path',
                 DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
             )
             ->where('universitys.id', $id)
             ->where('college_images.type', 'cover')
             ->first();
-
-
-
-        // $college = Universitys::Join('college_images', 'college_images.college_id', '=', 'universitys.id')
-        //     ->select('universitys.*', 'college_images.image_path')
-        //     ->where('universitys.id', $id)
-        //     ->first();
-
-
-
-
-
 
         if (!$college) {
             $response = [
@@ -210,7 +196,19 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 200);
         }
-        $course = DB::table('courses')->where('college_id', $college->id)->get();
+        $course = DB::table('courses')
+        ->select('courses.*','depertments.depertment_name','seat_structures.OBC',
+        'seat_structures.SC',
+        'seat_structures.ST',
+        'seat_structures.open',
+        'seat_structures.total_seat',
+        'seat_structures.EWS',
+        'seat_structures.other',)
+        ->join('depertments' ,'depertments.id','=','courses.depertment_id')
+        ->leftJoin('seat_structures', 'seat_structures.course_id', '=', 'courses.id')
+        ->where('courses.college_id', $college->college_id)
+        ->get();
+
         $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
 
         foreach ($photos as $photo) {
@@ -251,6 +249,27 @@ class UniversityController extends Controller
             return response()->json($response, 200);
         }
         $courses = DB::table('courses')->where('college_id', $college['id'])->get();
+        // $application = DB::table('courses')->where(['college_id', $college['id'],'admission_status','confirmed'])->get();
+
+        // $application = Admission::join('universitys', 'admissions.college_id', '=', 'universitys.id')
+        // ->join('courses', 'admissions.course_id', '=', 'courses.id')
+        // ->join('depertments', 'courses.depertment_id', '=', 'depertments.id')
+        // ->join('student_personal_data',  'admissions.student_id', '=', 'student_personal_data.student_id')
+        // ->select('admissions.id', 'courses.courseName', 'universitys.collegeName','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.qualification','student_personal_data.mark_obtain_lastExam', 'depertments.depertment_name')
+        // ->where('admissions.college_id', $college['id'])
+        // ->where('admission_status', 'confirmed')
+        // ->get();
+
+        $application = Admission::join('universitys', 'admissions.college_id', '=', 'universitys.id')
+        ->join('courses', 'admissions.course_id', '=', 'courses.id')
+        ->join('depertments', 'courses.depertment_id', '=', 'depertments.id')
+        ->join('student_personal_data',  'admissions.student_id', '=', 'student_personal_data.student_id')
+        ->select('admissions.id', 'courses.courseName', 'universitys.collegeName','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.qualification','student_personal_data.mark_obtain_lastExam', 'depertments.depertment_name')
+        ->where('admissions.college_id', $college['id'])
+        ->where('admission_status', 'confirmed')
+        ->distinct()
+        ->get();
+
 
         if (!$courses) {
             $response = [
@@ -262,7 +281,8 @@ class UniversityController extends Controller
         $response = [
             'success' => true,
             'myCollege' => $college,
-            'myCourses' => $courses
+            'myCourses' => $courses,
+            'clgConfirmApplication'=>$application
         ];
         return response()->json($response, 200);
     }

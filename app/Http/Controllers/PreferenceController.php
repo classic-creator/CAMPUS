@@ -13,7 +13,7 @@ class PreferenceController extends Controller
   public function addPreference(Request $request)
   {
     $user = $request->user();
-    if(!$user){
+    if (!$user) {
       $response = [
         'success' => false,
         'message' => 'Please login'
@@ -50,15 +50,11 @@ class PreferenceController extends Controller
     $preference = Preference::create([
       'student_id' => $user['id'],
       'college1' => $request->college1,
-      'college2' => $request->college2,
-      'college3' => $request->college3,
+
       'course1' => $request->course1,
-      'course2' => $request->course2,
-      'course3' => $request->course3,
+
       'depertment1' => $request->depertment1,
-      'depertment2' => $request->depertment2,
-      'depertment3' => $request->depertment3,
-      'address' => $request->address,
+
 
 
     ]);
@@ -79,7 +75,7 @@ class PreferenceController extends Controller
   {
 
     $user = $request->user();
-    if(!$user){
+    if (!$user) {
       $response = [
         'success' => false,
         'message' => 'Please login'
@@ -111,60 +107,61 @@ class PreferenceController extends Controller
         'message' => $validator->errors()
       ];
       return response()->json($response, 400);
-    };
+    }
+    ;
 
-    
+    $college1 = $request->input('college1') ?: null;
+    $course1 = $request->input('course1') ?: null;
+    $depertment1 = $request->input('depertment1') ?: null;
     $preference->update([
-      'college1' => $request->input('college1'),
-      'college2' => $request->input('college2'),
-      'college3' => $request->input('college3'),
-      'course1' => $request->input('course1'),
-      'course2' => $request->input('course2'),
-      'course3' => $request->input('course3'),
-      'depertment1' => $request->input('depertment1'),
-      'depertment2' => $request->input('depertment2'),
-      'depertment3' => $request->input('depertment3'),
+      'college1' => $college1,
+
+      'course1' => $course1,
+
+      'depertment1' => $depertment1,
+
       // 'address' => $request->input('address'),
 
-  ]);
-  $preference->save();
+    ]);
+    $preference->save();
 
-  $response = [
+    $response = [
       'success' => true,
-      'message'=>'update Preference successfully',
-     
+      'message' => 'update Preference successfully',
 
-  ];
-  return response()->json($response, 200);
+
+    ];
+    return response()->json($response, 200);
   }
 
 
   //get preferences
 
-  public function getPreferences(Request $request){
+  public function getPreferences(Request $request)
+  {
 
-      $user=$request->user();
+    $user = $request->user();
 
-      $preference=Preference::where('student_id',$user['id'])->first();
+    $preference = Preference::where('student_id', $user['id'])->first();
 
-      if(!$preference){
+    if (!$preference) {
 
-        $response=[
-          'success'=>false,
-          'message'=>'please add preferences'
-        ];
-        return response()->json($response,200);
-      }
+      $response = [
+        'success' => false,
+        'message' => 'please add preferences'
+      ];
+      return response()->json($response, 200);
+    }
 
-    $response=[
-      'success'=>true,
-      'preference'=>$preference
+    $response = [
+      'success' => true,
+      'preference' => $preference
     ];
 
-      return response()->json($response,200);
+    return response()->json($response, 200);
   }
 
-  //delete preferences
+//delete preferences
 
 
 }

@@ -16,8 +16,10 @@ class Admission extends Model
        'personalDetails_id',
        'educationalDetails_id',
        'address_id',
-       'payment_status',
-       'admission_status'
+       'files_id'
+    //    'admission_payment_status',
+    //    'apply_payment_status',
+    //    'admission_status',
        
     ];
 }

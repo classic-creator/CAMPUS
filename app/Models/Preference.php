@@ -12,14 +12,11 @@ class Preference extends Model
     protected $fillable = [
         'student_id',
         'college1',
-        'college2',
-        'college3',
+        
         'course1',
-        'course2',
-        'course3',
+        
         'depertment1',
-        'depertment2',
-        'depertment3',
-        'address',
+        
+       
     ];
 }

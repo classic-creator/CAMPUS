@@ -10,6 +10,7 @@ use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DepertmentController;
 use App\Http\Controllers\CourseImgController;
+use App\Models\StudentsFilesDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -55,9 +56,12 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/register/educationalDetails', [StudentDetails::class, 'registerStudentEducationalDetails']);
     Route::get('/get/educationalDetails', [StudentDetails::class, 'GetStudentEducation']);
     Route::post('/register/address', [StudentDetails::class, 'registerStudentAddress']);
+    Route::post('/upload/files', [StudentDetails::class, 'ApplyFileUploadController']);
     Route::get('/get/address', [StudentDetails::class, 'getStudentAddress']);
     Route::get('/get/applications', [AdmissionController::class, 'getMyapplications']);
+    Route::get('/get/applyfiles', [StudentDetails::class, 'getApplyFilesController']);
     Route::get('/admission/payment/{id}', [AdmissionController::class, 'AdmissionPayment']);
+    Route::get('/add/seatStructure/{id}', [CoursesController::class, 'uploadSeatStructure']);
 });
 
 // admin protected routes
