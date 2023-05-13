@@ -111,6 +111,7 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::post('/image/college/logo', [CollegeImageController::class, 'AddCollegeLogoImg']);
     Route::post('/image/college/cover', [CollegeImageController::class, 'AddCollegeCoverImg']);
     Route::post('/image/college/other', [CollegeImageController::class, 'collegeOtherImageUpload']);
+    Route::get('/course/payments/details/{id}', [NewPaymentController::class, 'coursePaymentDetails']);
 });
 
 

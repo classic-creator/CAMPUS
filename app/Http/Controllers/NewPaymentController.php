@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admission;
+use App\Models\Universitys;
 use Illuminate\Support\Facades\DB;
 use App\Models\Courses;
 use App\Models\NewPayment;
@@ -62,8 +63,13 @@ class NewPaymentController extends Controller
   public function getCoursePaymentRequest(Request $request, $id)
   {
 
+     $totalStudents=Admission::where('course_id',$id)->where('admission_status','confirmed')->count();
+     
 
-    $Payments = NewPayment::where('course_id', $id)->get();
+    //  $Payments = NewPayment::where('course_id', $id)->get();
+    $Payments = NewPayment::select('*', DB::raw('(SELECT COUNT(*) FROM payments WHERE fees_id = new_payments.id) as feePaymentStudent'))
+    ->where('course_id', $id)
+    ->get();
 
     if (!$Payments) {
 
@@ -72,6 +78,12 @@ class NewPaymentController extends Controller
         'payments' => $Payments
       ];
       return response()->json($response, 200);
+    }
+
+    foreach ($Payments as $payment) {
+      $payment->totalStudents = $totalStudents;
+      // $payment->feePaymentStudent =  Payment::where('fees_id',$payment->id)->count();
+     
     }
 
     $response = [
@@ -284,7 +296,46 @@ class NewPaymentController extends Controller
 
   }
 
-  // student payment history
+  // course payment details
+
+  public function coursePaymentDetails(Request $request,$id){
+    
+    $user=$request->user();
+   
+    $course = Courses::join('new_payments', 'new_payments.course_id', '=', 'courses.id')
+                  ->where('new_payments.id', $id)
+                  ->where('courses.college_id', function($query) use ($user) {
+                      $query->select('id')
+                            ->from('Universitys')
+                            ->where('create-by', $user['id'])
+                            ->limit(1);
+                  })
+                  ->first();
+
+     if(!$course){
+
+     
+      $response=[
+        'success'=>false,
+        'messege'=>'Course not exist/fees not exist'
+       ];
+    
+       return response()->json($response,200);
+     }
+     $paymentData=Payment::select('payments.*','new_payments.amount','users.name')
+     ->join('users','users.id','payments.student_id')
+     ->join('new_payments','new_payments.id','payments.fees_id')
+     ->where('payments.fees_id',$id)->get();
+
+     $response=[
+      'success'=>true,
+      'payment_Data'=>$paymentData
+     ];
+
+     return response()->json($response,200);
+  
+ 
+  }
 
 
 
