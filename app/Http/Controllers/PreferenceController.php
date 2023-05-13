@@ -29,23 +29,10 @@ class PreferenceController extends Controller
         'success' => false,
         'message' => 'Your preference add sucessfully you can update your preferences'
       ];
-      return response()->json($response, 302);
-    }
-
-    $validator = Validator::make($request->all(), [
-
-      // 'college1' => 'required',
-      // 'course1' => 'required',
-      // 'address' => 'required',
-    ]);
-    if ($validator->fails()) {
-      $response = [
-        'success' => false,
-        'message' => $validator->errors()
-
-      ];
       return response()->json($response, 200);
     }
+
+    
 
     $preference = Preference::create([
       'student_id' => $user['id'],

@@ -93,7 +93,7 @@ class CoursesController extends Controller
     }
 
     //get all courses public
-    public function getAllCourses(Request $request)
+    public function getAllCourses(Request $request) 
     {
 
         $course = DB::table('courses')

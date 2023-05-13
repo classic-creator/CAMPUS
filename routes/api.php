@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\CollegeImageController;
 use App\Http\Controllers\CoursesController;
+use App\Http\Controllers\NewPaymentController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\StudentDetails;
@@ -36,11 +37,12 @@ Route::get('/courses',[CoursesController::class,'getAllCourses']);
 Route::get('/college/{id}',[UniversityController::class,'getCollegeDetails']);
 Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails']);
 
+Route::get('/get/razorpay/key', [NewPaymentController::class, 'getRezorpayKey']);
 
-
-
+Route::post('/payment/varification', [NewPaymentController::class, 'PaymentVerification']);
 //login protected routes
 Route::middleware(['auth:sanctum'])->group(function(){
+   
     
     Route::get('/preference/courses',[CoursesController::class,'getPreferedCourses']);
     Route::post('/logout',[UserController::class,'logout']);
@@ -61,7 +63,14 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/get/applications', [AdmissionController::class, 'getMyapplications']);
     Route::get('/get/applyfiles', [StudentDetails::class, 'getApplyFilesController']);
     Route::get('/admission/payment/{id}', [AdmissionController::class, 'AdmissionPayment']);
-    Route::get('/add/seatStructure/{id}', [CoursesController::class, 'uploadSeatStructure']);
+    Route::post('/add/seatStructure/{id}', [CoursesController::class, 'uploadSeatStructure']);
+    Route::post('/add/payment/{id}', [NewPaymentController::class, 'NewPayment']);
+    Route::get('/get/payment/{id}', [NewPaymentController::class, 'getCoursePaymentRequest']);
+    Route::get('/student/payment/{id}', [NewPaymentController::class, 'getStudentPaymentRequest']);
+   
+    Route::post('/process/payment/{id}',[NewPaymentController::class,'processPayments']);
+    Route::get('/payment/history/{id}',[NewPaymentController::class,'getStudentPaymenthistory']);
+    
 });
 
 // admin protected routes
