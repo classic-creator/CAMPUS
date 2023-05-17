@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Admission;
 use App\Models\collegeImage;
 use App\Models\Courses;
+use App\Models\Links;
 use App\Models\Preference;
 use App\Models\Universitys;
 use App\Models\User;
@@ -177,59 +178,117 @@ class UniversityController extends Controller
 
     }
     //get college details for public
-    public function getCollegeDetails(Request $request, $id)
-    {
-        $college = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
-            ->select(
-                'universitys.id as college_id','universitys.collegeName','universitys.address','universitys.description','universitys.rating',
-                'college_images.image_path as cover_image_path',
-                DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
-            )
-            ->where('universitys.id', $id)
-            ->where('college_images.type', 'cover')
-            ->first();
+    //  public function getCollegeDetails(Request $request, $id)
+    // {
+    //     $college = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
+    //         ->select(
+    //             'universitys.id as college_id','universitys.collegeName','universitys.address','universitys.description','universitys.rating',
+    //             'college_images.image_path as cover_image_path',
+    //             DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
+    //         )
+    //         ->where('universitys.id', $id)
+    //         ->where('college_images.type', 'cover')
+    //         ->first();
 
-        if (!$college) {
-            $response = [
-                'success' => false,
-                'message' => "college not found"
-            ];
-            return response()->json($response, 200);
-        }
-        $course = DB::table('courses')
-        ->select('courses.*','depertments.depertment_name','seat_structures.OBC',
-        'seat_structures.SC',
-        'seat_structures.ST',
-        'seat_structures.open',
-        'seat_structures.total_seat',
-        'seat_structures.EWS',
-        'seat_structures.other',)
-        ->join('depertments' ,'depertments.id','=','courses.depertment_id')
+    //     if (!$college) {
+    //         $response = [
+    //             'success' => false,
+    //             'message' => "college not found"
+    //         ];
+    //         return response()->json($response, 200);
+    //     }
+    //     $course = DB::table('courses')
+    //     ->select('courses.*','depertments.depertment_name','seat_structures.OBC',
+    //     'seat_structures.SC',
+    //     'seat_structures.ST',
+    //     'seat_structures.open',
+    //     'seat_structures.total_seat',
+    //     'seat_structures.EWS',
+    //     'seat_structures.other',)
+    //     ->join('depertments' ,'depertments.id','=','courses.depertment_id')
+    //     ->leftJoin('seat_structures', 'seat_structures.course_id', '=', 'courses.id')
+    //     ->where('courses.college_id', $college->college_id)
+    //     ->get();
+
+    //     $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
+
+    //     foreach ($photos as $photo) {
+    //         // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
+    //         $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
+
+    //     }
+
+       
+    //     $college->cover_image_url = $college->cover_image_path ? url($college->cover_image_path) : null;
+    //     $college->logo_image_url = $college->logo_image_path ? url($college->logo_image_path) : null;
+
+
+    //     $response = [
+    //         'success' => true,
+    //         'college' => $college,
+    //         'courses' => $course,
+    //         'photos' => $photos
+    //     ];
+    //     return response()->json($response, 200);
+    // } 
+
+    public function getCollegeDetails(Request $request, $id)
+{
+    $college = Universitys::select(
+        'universitys.id as college_id', 'universitys.collegeName', 'universitys.address', 'universitys.description', 'universitys.rating'
+    )
+        ->where('universitys.id', $id)
+        ->first();
+
+    if (!$college) {
+        $response = [
+            'success' => false,
+            'message' => "College not found"
+        ];
+        return response()->json($response, 200);
+    }
+
+    $course = DB::table('courses')
+        ->select(
+            'courses.*', 'depertments.depertment_name', 'seat_structures.OBC',
+            'seat_structures.SC', 'seat_structures.ST', 'seat_structures.open',
+            'seat_structures.total_seat', 'seat_structures.EWS', 'seat_structures.other'
+        )
+        ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
         ->leftJoin('seat_structures', 'seat_structures.course_id', '=', 'courses.id')
         ->where('courses.college_id', $college->college_id)
         ->get();
 
-        $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
+    $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
 
-        foreach ($photos as $photo) {
-            // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
-            $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
-
-        }
-
-        // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
-        $college->cover_image_url = $college->cover_image_path ? url($college->cover_image_path) : null;
-        $college->logo_image_url = $college->logo_image_path ? url($college->logo_image_path) : null;
-
-
-        $response = [
-            'success' => true,
-            'college' => $college,
-            'courses' => $course,
-            'photos' => $photos
-        ];
-        return response()->json($response, 200);
+    foreach ($photos as $photo) {
+        $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
     }
+
+    $college->cover_image_url = null; // Set default cover image URL
+    $college->logo_image_url = null; // Set default logo image URL
+
+    if ($college_images = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
+        ->select(
+            'college_images.image_path as cover_image_path',
+            DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
+        )
+        ->where('universitys.id', $id)
+        ->where('college_images.type', 'cover')
+        ->first()
+    ) {
+        $college->cover_image_url = $college_images->cover_image_path ? url($college_images->cover_image_path) : null;
+        $college->logo_image_url = $college_images->logo_image_path ? url($college_images->logo_image_path) : null;
+    }
+
+    $response = [
+        'success' => true,
+        'college' => $college,
+        'courses' => $course,
+        'photos' => $photos
+    ];
+    return response()->json($response, 200);
+}
 
 
     //get college details for college stuff
@@ -249,28 +308,6 @@ class UniversityController extends Controller
             return response()->json($response, 200);
         }
         $courses = DB::table('courses')->where('college_id', $college['id'])->get();
-        // $application = DB::table('courses')->where(['college_id', $college['id'],'admission_status','confirmed'])->get();
-
-        // $application = Admission::join('universitys', 'admissions.college_id', '=', 'universitys.id')
-        // ->join('courses', 'admissions.course_id', '=', 'courses.id')
-        // ->join('depertments', 'courses.depertment_id', '=', 'depertments.id')
-        // ->join('student_personal_data',  'admissions.student_id', '=', 'student_personal_data.student_id')
-        // ->select('admissions.id', 'courses.courseName', 'universitys.collegeName','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.qualification','student_personal_data.mark_obtain_lastExam', 'depertments.depertment_name')
-        // ->where('admissions.college_id', $college['id'])
-        // ->where('admission_status', 'confirmed')
-        // ->get();
-
-        $application = Admission::join('universitys', 'admissions.college_id', '=', 'universitys.id')
-        ->join('courses', 'admissions.course_id', '=', 'courses.id')
-        ->join('depertments', 'courses.depertment_id', '=', 'depertments.id')
-        ->join('student_personal_data',  'admissions.student_id', '=', 'student_personal_data.student_id')
-        ->select('admissions.id', 'courses.courseName', 'universitys.collegeName','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.qualification','student_personal_data.mark_obtain_lastExam', 'depertments.depertment_name')
-        ->where('admissions.college_id', $college['id'])
-        ->where('admission_status', 'confirmed')
-        ->distinct()
-        ->get();
-
-
         if (!$courses) {
             $response = [
                 'success' => false,
@@ -278,11 +315,69 @@ class UniversityController extends Controller
             ];
             return response()->json($response, 200);
         }
+      
+        $application = Admission::select('admissions.id', 'courses.courseName', 'universitys.collegeName','student_personal_data.first_name','student_personal_data.middle_name','student_personal_data.last_name','student_personal_data.qualification','student_personal_data.mark_obtain_lastExam', 'depertments.depertment_name')
+        ->join('universitys', 'admissions.college_id', '=', 'universitys.id')
+        ->join('courses', 'admissions.course_id', '=', 'courses.id')
+        ->join('depertments', 'courses.depertment_id', '=', 'depertments.id')
+        ->join('student_personal_data','student_personal_data.id','=','admissions.personalDetails_id')
+
+    
+       
+        ->where('admissions.college_id', $college['id'])
+        ->where('admission_status', 'confirmed')
+        // ->distinct()
+        ->get();
+
+
+    
+       
+        $photos = collegeImage::where('college_id', $college['id'])->where('type', '=', 'other')->get();
+        
+        foreach ($photos as $photo) {
+            $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
+        }
+        
+        // $cover_image_url = null; // Set default cover image URL
+        // $logo_image_url = null; // Set default logo image URL
+
+
+    //     if ($college_images = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
+    //     ->select('college_images.*')
+    //     ->where('universitys.id', '=', $college['id'])
+    //     ->where('college_images.type', '=', 'cover')
+    //     ->first()
+    // ) {
+    //     $cover_image_url = $college_images->image_path ? url($college_images->image_path) : null;
+    //     // Retrieve logo image URL separately
+    //     $logo_image_url = collegeImage::where('college_id', $college['id'])
+    //         ->where('type', 'logo')
+    //         ->value('image_path');
+    //     $logo_image_url = $logo_image_url ? url($logo_image_url) : null;
+    // };
+
+
+      $cover = collegeImage::where('college_id', $college['id'])->where('type', '=', 'cover')->first();
+      if($cover){
+
+          $cover->image_url = $cover->image_path ? url($cover->image_path) : null;
+      }
+
+      $logo = collegeImage::where('college_id', $college['id'])->where('type', '=', 'logo')->first();
+      if($logo){
+
+          $logo->image_url = $logo->image_path ? url($logo->image_path) : null;
+      }
+
+
         $response = [
             'success' => true,
             'myCollege' => $college,
             'myCourses' => $courses,
-            'clgConfirmApplication'=>$application
+            'clgConfirmApplication'=>$application,
+            'photos'=>$photos,
+            'cover_image'=>$cover ,
+            'logo_image'=>  $logo
         ];
         return response()->json($response, 200);
     }
@@ -351,10 +446,6 @@ class UniversityController extends Controller
         }
         ;
 
-        //   $college->collegeName=$request->collegeName;
-        //   $college->email=$request->email;
-        //   $college->address=$request->address;
-        //   $college->description=$request->description;
 
         $college->update([
             "collegeName" => $request->input('collegeName'),
@@ -371,7 +462,134 @@ class UniversityController extends Controller
         return response()->json($response, 200);
     }
 
+//add importantas link
+public function AddNotice(Request $request)
+{
 
+
+     $user=$request->user();
+     $college=Universitys::where('create-by',$user['id'])->first();
+
+    if (!$college){
+
+        $response = [
+            'success' => false,
+            'message' => 'college not found'
+
+        ];
+        return response()->json($response, 200);
+     };
+
+
+    $validator = Validator::make($request->all(), [
+
+            'title' => 'required',
+            'link' => 'required',
+        
+
+        ]);
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+
+            ];
+            return response()->json($response, 404);
+        };
+
+    Links::Create([
+    'title'=>$request->input('title'),
+    'link'=>$request->input('link'),
+    'college_id'=>$college['id']
+   
+    ]);
+
+    $response = [
+        'success' => true,
+        'message' =>'add notic successfully'
+
+    ];
+    return response()->json($response, 201);
+
+}
+
+//get links for college
+
+public function GetCollegeNots(Request $request)
+{
+
+     $user=$request->user();
+     $college=Universitys::where('create-by',$user['id'])->first();
+
+    if (!$college){
+
+        $response = [
+            'success' => false,
+            'message' => 'college not found'
+
+        ];
+        return response()->json($response, 200);
+     };
+
+
+   $links=Links::where('college_id',$college['id'])->get();
+
+  
+
+    $response = [
+        'success' => true,
+        'notic' =>$links
+
+    ];
+    return response()->json($response, 200);
+
+}
+
+//get links for Public
+
+public function GetNotics(Request $request,$id)
+{
+
+   $links=Links::where('college_id',$id)->get();
+
+  
+
+    $response = [
+        'success' => true,
+        'notic' =>$links
+
+    ];
+    return response()->json($response, 200);
+
+}
+public function deleteNotice(Request $request,$id)
+{
+
+
+     $user=$request->user();
+     $college=Universitys::where('create-by',$user['id'])->first();
+
+
+     if (!$college){
+
+        $response = [
+            'success' => false,
+            'message' => 'college not found'
+
+        ];
+        return response()->json($response, 200);
+     };
+
+     Links::where('college_id', $college['id'])->where('id',$id)->delete();
+
+    $response = [
+        'success' => true,
+        'message' => 'Delete notic successfully'
+
+    ];
+    return response()->json($response, 200);
+
+}
 
 
     //delete college 

@@ -32,7 +32,7 @@ return new class extends Migration
             $table->unsignedBigInteger('address_id');
             $table->foreign('address_id')->references('id')->on('addresses');
 
-            $table->string('admission_status')->default('under-review');
+            $table->string('admission_status')->default('application_fee_panding');
             $table->string('payment_status')->default('pending');
 
             $table->timestamps();

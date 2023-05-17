@@ -17,7 +17,8 @@ class Courses extends Model
         'admission_fees',
         'duration',
         'eligibility',
-        'seat_capacity'
+        'seat_capacity',
+        'vacent_seat',
       
        
     ];

@@ -60,6 +60,7 @@ class CoursesController extends Controller
             'duration' => $request->duration,
             'eligibility' => $request->eligibility,
             'seat_capacity' => $request->seat_capacity,
+            'vacent_seat'=>$request->seat_capacity,
             'college_id' => $college['id'],
             'depertment_id' => $depertment['id']
         ]);
@@ -263,6 +264,7 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
             ->select(
                 'courses.*',
                 'universitys.address',
+                'universitys.collegeName',
                 'depertments.depertment_name',
                 'seat_structures.OBC',
                 'seat_structures.SC',
@@ -371,7 +373,13 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
 
         $user = $request->user();
 
-        $course = Courses::where('id', $id)->first();
+        
+
+        $course = Courses::
+        // join('universitys','universitys.id','=','courses.college_id')
+        // ->where('universitys.create-by',$user['id'])
+        where('courses.id', $id)
+        ->first();
         // $course = DB::table('courses')->find($courseid);
 
         if (!$course) {
@@ -401,10 +409,21 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
             return response()->json($response, 400);
         }
         ;
+if($request->input('seat_capacity')>$course['seat_capacity']){
+    $vacent_seat= $course['vacent_seat'] +( $request->input('seat_capacity') -  $course['seat_capacity']);
+    $course->update([ 'vacent_seat'=> $vacent_seat]);
+    $course->save();
+}
+if($request->input('seat_capacity')<$course['seat_capacity']){
+    $vacent_seat=$course['vacent_seat'] -( $course['seat_capacity']-$request->input('seat_capacity'));
+    $course->update([ 'vacent_seat'=> $vacent_seat]);
+    $course->save();
+}
+
 
         $course->update([
             "courseName" => $request->input('courseName'),
-
+           
             "duration" => $request->input('duration'),
             "eligibility" => $request->input('eligibility'),
             "seat_capacity" => $request->input('seat_capacity'),
@@ -425,6 +444,7 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
         $ewsSeats = ceil($totalSeats * 0.1);
         $otherSeats = ceil($totalSeats * 0.02);
         $openSeats = $totalSeats - ($obcSeats + $scSeats + $stSeats + $ewsSeats + $otherSeats);
+ 
         $seat_structure->update([
             // SeatStructure::create([  
             "total_seat" => $totalSeats,
@@ -438,6 +458,8 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
         ]);
 
         $seat_structure->save();
+ 
+
         $response = [
             'success' => true,
             'course' => $course,

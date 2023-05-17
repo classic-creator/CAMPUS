@@ -19,6 +19,9 @@ public function register(Request $request){
         'name'=>'required',
         'email'=>'required|email|unique:users',
         'password'=>'required',
+        'user_role'=>'required',
+        'gender'=>'required',
+        'phon_no'=>'required',
         'confirm_password'=>'required|same:password',
         // 'type'=>'numeric'
    ]);
@@ -30,16 +33,23 @@ public function register(Request $request){
        return response()->json($response,400);
    } 
 
+
+   $image_path = $request->file('profile')->store('user_profile');
+
     $user = User::create([
         'name'=>$request->name,
         'email'=>$request->email,
+        'user_role'=>$request->user_role,
+        'gender'=>$request->gender,
+        'phon_no'=>$request->phon_no,
+        'profile'=>$image_path ,
         'password'=>Hash::make($request->password),
         'type'=>$request->input('type', '0')
 
         
     ]);
     $token = $user->createToken($request->email)->plainTextToken;
-
+    $user->image_url = $user->profile ? url($user->profile) : null;
     $response=[
         'success'=>true,
         'message'=>"registration success",
@@ -68,6 +78,7 @@ public function login(Request $request){
     if($user && Hash::check($request->password, $user->password)){
 
         $token = $user->createToken($request->email)->plainTextToken;
+        $user->image_url = $user->profile ? url($user->profile) : null;
         
         return response([
             'message' => 'Login Success',
@@ -100,6 +111,7 @@ public function logout(){
 public function getProfile(){
 
     $user=auth()->user();
+    $user->image_url = $user->profile ? url($user->profile) : null;
 
     $response=[
         'success'=>true,
@@ -184,7 +196,46 @@ public function updateUsersAdmin(Request $request,$id){
 }
 
 
-//add student details
+//update user profile
+
+public function updateProfile(Request $request){
+
+    $validator=Validator::make($request->all(),[
+      
+        'name'=>'required',
+        // 'confirm_password'=>'required|same:password'
+    ]);
+    if($validator->fails()){
+        $response=[
+            'success'=>false,
+            'message'=>$validator->errors()
+        ];
+        return response()->json($response,400);
+    };
+    $user=auth()->user();
+    if($request->file('profile')){
+    $image_path = $request->file('profile')->store('user_profile');
+    $user->name=$request->name;
+    $user->profile=$image_path;
+    $user->save();
+
+
+  $user->image_url = $user->profile ? url($user->profile) : null;
+    }else{
+        $user->name=$request->name;
+     
+        $user->save();
+    }
+
+
+
+      $response=[
+        'success'=>true,
+        'user'=>$user,
+    
+    ];
+    return response()->json($response,200);
+}
 
 
 

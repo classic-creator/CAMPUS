@@ -35,6 +35,7 @@ Route::put('/reset-password/{token}',[PasswordResetController::class,'resetPassw
 Route::get('/colleges',[UniversityController::class,'getAllCollege']);
 Route::get('/courses',[CoursesController::class,'getAllCourses']);
 Route::get('/college/{id}',[UniversityController::class,'getCollegeDetails']);
+Route::get('/college/links/{id}',[UniversityController::class,'GetNotics']);
 Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails']);
 
 Route::get('/get/razorpay/key', [NewPaymentController::class, 'getRezorpayKey']);
@@ -49,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/getProfile',[UserController::class,'getProfile']);
     Route::put('/changepassword',[UserController::class,'changePassword']);
     Route::post('/collegeregister', [UniversityController::class, 'registerCollege']);
+    Route::post('/Profile/update', [UserController::class, 'updateProfile']);
     Route::post('/apply/course/{id}', [AdmissionController::class, 'applyAdmission']);
     Route::post('/add/preference', [PreferenceController::class, 'addPreference']);
     Route::get('/get/preference', [PreferenceController::class, 'getPreferences']);
@@ -112,6 +114,10 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::post('/image/college/cover', [CollegeImageController::class, 'AddCollegeCoverImg']);
     Route::post('/image/college/other', [CollegeImageController::class, 'collegeOtherImageUpload']);
     Route::get('/course/payments/details/{id}', [NewPaymentController::class, 'coursePaymentDetails']);
+    Route::post('/course/payments/close', [NewPaymentController::class, 'CloseFeesStatus']);
+    Route::post('/add/notic', [UniversityController::class, 'AddNotice']);
+    Route::delete('/delete/notic/{id}', [UniversityController::class, 'deleteNotice']);
+    Route::get('/get/notic', [UniversityController::class, 'GetCollegeNots']);
 });
 
 

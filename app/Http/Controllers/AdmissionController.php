@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\Courses;
+use App\Models\NewPayment;
+use App\Models\Payment;
 use App\Models\StudentEducationalDetails;
 use App\Models\StudentPersonalDetails;
 use App\Models\StudentsFilesDetails;
@@ -24,8 +26,8 @@ class AdmissionController extends Controller
 
         $user = $request->user();
 
-        $course = Courses::findOrFail( $id);
-        
+        $course = Courses::findOrFail($id);
+
 
         $college = Universitys::where('id', $course['college_id'])->first();
         $personalDetails = StudentPersonalDetails::where('student_id', $user['id'])->latest('created_at')->first();
@@ -50,7 +52,7 @@ class AdmissionController extends Controller
             'college_id' => $college['id'],
             'personalDetails_id' => $personalDetails['id'],
             'educationalDetails_id' => $educationalDetails['id'],
-            'files_id'=>$files['id'],
+            'files_id' => $files['id'],
             'address_id' => $studentAddress['id'],
             // 'admission_payment_status'=>$request->admission_payment_status,
             // 'admission_status'=>$request->admission_status
@@ -74,7 +76,24 @@ class AdmissionController extends Controller
         $user = $request->user();
 
 
-        $applications = DB::table('admissions')->select('admissions.id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'courses.courseName', 'universitys.collegeName', 'universitys.address', )->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('users', 'users.id', '=', 'admissions.student_id')->where('student_id', $user['id'])->get();
+        // $applications = DB::table('admissions')
+        $applications = Admission::
+            select('admissions.id', 'admissions.admission_status', 'admissions.admission_payment_status', 'admissions.apply_payment_status', 'users.name', 'courses.courseName', 'admissions.course_id', 'universitys.collegeName', 'universitys.address', )
+            ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->join('courses', 'courses.id', '=', 'admissions.course_id')
+            ->join('users', 'users.id', '=', 'admissions.student_id')
+            ->where('student_id', $user['id'])
+            ->get();
+
+        foreach ($applications as $apply) {
+
+            if ($apply->apply_payment_status === 'panding') {
+                $FeesDetails = NewPayment::where('course_id', $apply['course_id'])->where('fees_type', 'application_fees')->first();
+                $apply->fees_id = $FeesDetails->id;
+                $apply->amount = $FeesDetails->amount;
+                $apply->fees_type = $FeesDetails->fees_type;
+            }
+        }
 
         if (!$applications) {
             $response = [
@@ -125,25 +144,35 @@ class AdmissionController extends Controller
 
     public function getCourseApplication(Request $request, $id)
     {
+        $user = $request->user();
 
-
-        // $course = Courses::where('id', $id)->first();
-        // $course = Courses::findOrFail($id);
-
-        // if(!$course){
-        //     $response = [
-        //         'success' => false,
-        //         'message'=>'college not found'
-        //     ];
-        //     return response()->json($response, 200);
-        // }
-
-
-        $applications = DB::table('admissions')->where('course_id', $id)->select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.dob','student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name','addresses.circle_office')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
-        if ($applications->isEmpty()) {
+        $courses = Courses::
+            join('universitys', 'universitys.id', '=', 'courses.college_id')
+            ->where('courses.id', $id)
+            ->where('universitys.create-by', $user['id'])->first();
+        if (!$courses) {
             $response = [
                 'success' => false,
-                'applications' => $applications,
+
+                'messege' => 'no course found'
+            ];
+        }
+
+        // $applications = DB::table('admissions')
+        $applications = Admission::
+            select('admissions.id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.dob', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'addresses.circle_office')
+            ->join('users', 'users.id', '=', 'admissions.student_id')
+            ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->join('courses', 'courses.id', '=', 'admissions.course_id')
+            ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+            ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+            ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+            ->where('admissions.course_id', $id)
+            ->get();
+        if (!$applications) {
+            $response = [
+                'success' => false,
+                'applications' => 'application not found',
 
             ];
             return response()->json($response, 200);
@@ -151,7 +180,7 @@ class AdmissionController extends Controller
 
         $response = [
             'success' => true,
-            'applications' => $applications,
+            'course_applications' => $applications,
 
         ];
         return response()->json($response, 200);
@@ -162,7 +191,14 @@ class AdmissionController extends Controller
     {
 
 
-        $application = Admission::select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_educational_details.class10_school', 'student_educational_details.class10_roll', 'student_educational_details.class10_no', 'student_educational_details.class10_totalMark', 'student_educational_details.class10_markObtain', 'student_educational_details.class12_college', 'student_educational_details.class12_strem', 'student_educational_details.class12_board', 'student_educational_details.class12_totalMark', 'student_educational_details.class12_markObtain', 'student_educational_details.class12_roll', 'student_educational_details.class12_no', 'student_personal_data.email', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.qualification','students_files_details.*')
+        $user = $request->user();
+
+        $college = Universitys::where('create-by', $user['id'])->first();
+
+
+
+
+        $application = Admission::select('admissions.id', 'admissions.admission_status', 'admissions.admission_payment_status', 'admissions.student_id', 'admissions.course_id', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_educational_details.class10_school', 'student_educational_details.class10_roll', 'student_educational_details.class10_no', 'student_educational_details.class10_totalMark', 'student_educational_details.class10_markObtain', 'student_educational_details.class12_college', 'student_educational_details.class12_strem', 'student_educational_details.class12_board', 'student_educational_details.class12_totalMark', 'student_educational_details.class12_markObtain', 'student_educational_details.class12_roll', 'student_educational_details.class12_no', 'student_personal_data.email', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.qualification', 'students_files_details.profile_photo', 'students_files_details.aadhar', 'students_files_details.signature', 'students_files_details.hslc_registation', 'students_files_details.hslc_marksheet', 'students_files_details.hslc_certificate', 'students_files_details.hslc_admit', 'students_files_details.hsslc_registation', 'students_files_details.hsslc_marksheet', 'students_files_details.hsslc_certificate', 'students_files_details.hsslc_admit')
             ->join('users', 'users.id', '=', 'admissions.student_id')
             ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
             ->join('courses', 'courses.id', '=', 'admissions.course_id')
@@ -171,9 +207,15 @@ class AdmissionController extends Controller
             ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
             ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
             ->where('admissions.id', $id)
+            ->where('admissions.college_id', $college['id'])
             ->first();
 
         if ($application) {
+
+            $payment = Payment::select('payments.*', 'new_payments.id as fees_id', 'new_payments.amount', 'new_payments.fees_type')->join('new_payments', 'new_payments.id', '=', 'payments.fees_id')
+                ->where('new_payments.course_id', $application['course_id'])
+                ->where('payments.student_id', $application['student_id'])
+                ->get();
 
             $application->passport_image_url = $application->profile_photo ? url($application->profile_photo) : null;
             $application->aadhar_image_url = $application->aadhar ? url($application->aadhar) : null;
@@ -190,6 +232,7 @@ class AdmissionController extends Controller
             $response = [
                 'success' => true,
                 'application' => $application,
+                'payment_history' => $payment
 
             ];
             return response()->json($response, 200);
@@ -209,7 +252,22 @@ class AdmissionController extends Controller
     {
 
 
-        $admission = Admission::findOrFail($id);
+        $user = $request->user();
+
+        $admission = Admission::
+            join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->where('admissions.id', $id)
+            ->where('universitys.create-by', $user['id'])->first();
+        if (!$admission) {
+            $response = [
+                'success' => false,
+
+                'messege' => 'no course found'
+            ];
+
+            return response()->json($response,200);
+        }
+
 
         $validator = Validator::make($request->all(), [
 
@@ -224,6 +282,16 @@ class AdmissionController extends Controller
             return response()->json($response, 400);
         }
         ;
+        $colleges=Courses::where('id',$admission['course_id'])->first();
+        if($colleges['vacent_seat']=='0')
+{
+    $response = [
+        'success' => true,
+        'message' => 'Seat Capacity full'
+    ];
+    return response()->json($response, 400);
+
+}
 
 
         $admission->update(['admission_status' => $request->admission_status]);
@@ -261,7 +329,15 @@ class AdmissionController extends Controller
     {
 
 
-        $application = Admission::where(['course_id' => $id, 'admission_status' => 'Selected'])->select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
+        $application = Admission::where(['course_id' => $id, 'admission_status' => 'Selected'])
+            ->select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name')
+            ->join('users', 'users.id', '=', 'admissions.student_id')
+            ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->join('courses', 'courses.id', '=', 'admissions.course_id')
+            ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+            ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+            ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+            ->get();
 
         if ($application) {
 
@@ -284,27 +360,27 @@ class AdmissionController extends Controller
     // admission fee payment 
 
 
-public function AdmissionPayment(Request $request, $id)
+    public function AdmissionPayment(Request $request, $id)
     {
 
 
         $admission = Admission::findOrFail($id);
 
-      
+
 
 
         $admission->update([
             'admission_payment_status' => 'paid',
-            'admission_status'=>'confirmed'
+            'admission_status' => 'confirmed'
         ]);
-        
-      $course=  Courses::where('id',$admission['course_id'])->first();
 
-        $course->seat_capacity= $course->seat_capacity-1;
+        $course = Courses::where('id', $admission['course_id'])->first();
+
+        $course->seat_capacity = $course->seat_capacity - 1;
 
         $course->save();
 
-   
+
 
 
         $response = [
@@ -319,7 +395,15 @@ public function AdmissionPayment(Request $request, $id)
     {
 
 
-        $ConfirmStudent = Admission::where(['course_id' => $id, 'admission_payment_status' => 'paid'])->select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name')->join('users', 'users.id', '=', 'admissions.student_id')->join('universitys', 'universitys.id', '=', 'admissions.college_id')->join('courses', 'courses.id', '=', 'admissions.course_id')->join('addresses', 'addresses.id', '=', 'admissions.address_id')->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')->get();
+        $ConfirmStudent = Admission::where(['course_id' => $id, 'admission_payment_status' => 'paid'])
+            ->select('admissions.id as id', 'admissions.admission_status', 'admissions.admission_payment_status', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.mark_obtain_lastExam', 'student_personal_data.phon_no', 'student_personal_data.email')
+            ->join('users', 'users.id', '=', 'admissions.student_id')
+            ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+            ->join('courses', 'courses.id', '=', 'admissions.course_id')
+            ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+            ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+            ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+            ->get();
 
         if ($ConfirmStudent) {
 
@@ -341,9 +425,9 @@ public function AdmissionPayment(Request $request, $id)
         ];
         return response()->json($response, 200);
 
- 
+
     }
 
     //file upload 
-   
+
 }
