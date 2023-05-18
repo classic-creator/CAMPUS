@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Route;
 
 
 // Public Routes
+Route::get('/carousel/get', [CollegeImageController::class, 'getCarousel']);
+
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/sent-reset-password-email',[PasswordResetController::class,'forgetPassword']);
@@ -73,6 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/process/payment/{id}',[NewPaymentController::class,'processPayments']);
     Route::get('/payment/history/{id}',[NewPaymentController::class,'getStudentPaymenthistory']);
     
+  
 });
 
 // admin protected routes
@@ -82,6 +85,8 @@ Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
     Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
     Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
     Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
+
+
     
 });
 
@@ -113,11 +118,14 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::post('/image/college/logo', [CollegeImageController::class, 'AddCollegeLogoImg']);
     Route::post('/image/college/cover', [CollegeImageController::class, 'AddCollegeCoverImg']);
     Route::post('/image/college/other', [CollegeImageController::class, 'collegeOtherImageUpload']);
+    Route::delete('/image/delete/{id}', [CollegeImageController::class, 'DeleteGalarryImage']);
     Route::get('/course/payments/details/{id}', [NewPaymentController::class, 'coursePaymentDetails']);
     Route::post('/course/payments/close', [NewPaymentController::class, 'CloseFeesStatus']);
     Route::post('/add/notic', [UniversityController::class, 'AddNotice']);
     Route::delete('/delete/notic/{id}', [UniversityController::class, 'deleteNotice']);
     Route::get('/get/notic', [UniversityController::class, 'GetCollegeNots']);
+    Route::post('/carousel/upload', [CollegeImageController::class, 'addCarousel']);
+    Route::delete('/carousel/delete/{id}', [CollegeImageController::class, 'DeleteCarouselImage']);
 });
 
 

@@ -338,24 +338,7 @@ class UniversityController extends Controller
             $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
         }
         
-        // $cover_image_url = null; // Set default cover image URL
-        // $logo_image_url = null; // Set default logo image URL
-
-
-    //     if ($college_images = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
-    //     ->select('college_images.*')
-    //     ->where('universitys.id', '=', $college['id'])
-    //     ->where('college_images.type', '=', 'cover')
-    //     ->first()
-    // ) {
-    //     $cover_image_url = $college_images->image_path ? url($college_images->image_path) : null;
-    //     // Retrieve logo image URL separately
-    //     $logo_image_url = collegeImage::where('college_id', $college['id'])
-    //         ->where('type', 'logo')
-    //         ->value('image_path');
-    //     $logo_image_url = $logo_image_url ? url($logo_image_url) : null;
-    // };
-
+  
 
       $cover = collegeImage::where('college_id', $college['id'])->where('type', '=', 'cover')->first();
       if($cover){

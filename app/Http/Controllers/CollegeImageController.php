@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\collegeImage;
 use App\Models\Universitys;
+use App\Models\websiteImg;
+use Storage;
 use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -199,7 +201,136 @@ class CollegeImageController extends Controller
         return response()->json($response, 400);
     }
 
-    //
+    //galarry image delete 
+
+    public function DeleteGalarryImage(Request $request,$id){
+
+
+        $user = $request->user();
+        $college = Universitys::where('create-by', $user['id'])->first();
+        
+        $collegeImage = collegeImage::where('id', $id)->where('college_id', $college['id'])->first();
+        
+        if ($collegeImage) {
+            // Delete image from storage
+            Storage::delete($collegeImage->image_path);
+        
+            // Delete image from the database
+            $collegeImage->delete();
+        
+            $response = [
+                'success' => true,
+                'message' => 'Image deleted successfully'
+            ];
+            return response()->json($response, 200);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Image not found'
+            ];
+            return response()->json($response, 404);
+        }
+        
+    }
+
+    //landing page super Admin carousel image upload 
+
+    public function addCarousel(Request $request){
+
+        $validator = Validator::make($request->all(), [
+
+            'image_path' => 'required|image',
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+            ];
+            return response()->json($response, 400);
+        }
+
+        if ($request->has('image_path')) {
+            
+            $image_path = $request->file('image_path')->store('website_img');
+            $image_link = $request->input('image_link') ? $request->input('image_link') : $request->image_path->getClientOriginalName();
+            
+
+                websiteImg::create([
+                'link' =>  $image_link,
+                'image_path' => $image_path,
+            
+                'type' => 'carousel',
+            ]);
+
+           
+            $response = [
+
+                'success' => true,
+                'message' => "upload image successfully",
+
+            ];
+            return response()->json($response, 201);
+        }
+
+        $response = [
+
+            'success' => true,
+            'message' => "file not upload",
+
+        ];
+        return response()->json($response, 400);
+
+
+    }
+
+public function getCarousel(Request $request){
+
+
+    $photos = websiteImg::where('type', '=', 'carousel')->get();
+        
+    foreach ($photos as $photo) {
+        $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
+    }
+
+    $response=[
+        'success'=>true,
+        'photos'=>$photos
+    ];
+    return response()->json($response,200);
+
+}
+
+//delete carousel image
+
+public function DeleteCarouselImage(Request $request,$id){
+
+
+
+    
+    $collegeImage = websiteImg::where('id', $id)->first();
+    
+    if ($collegeImage) {
+        // Delete image from storage
+        Storage::delete($collegeImage['image_path']);
+    
+        // Delete image from the database
+        $collegeImage->delete();
+    
+        $response = [
+            'success' => true,
+            'message' => 'Image deleted successfully'
+        ];
+        return response()->json($response, 200);
+    } else {
+        $response = [
+            'success' => false,
+            'message' => 'Image not found'
+        ];
+        return response()->json($response, 404);
+    }
+    
+}
 
 
 }
