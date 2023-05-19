@@ -332,5 +332,56 @@ public function DeleteCarouselImage(Request $request,$id){
     
 }
 
+// super admin educational scheme upload 
+
+
+public function addScheme(Request $request){
+
+    $validator = Validator::make($request->all(), [
+
+        'image_path' => 'required|image',
+        'image_link'=>'required'
+    ]);
+
+    if ($validator->fails()) {
+        $response = [
+            'success' => false,
+            'message' => $validator->errors()
+        ];
+        return response()->json($response, 400);
+    }
+
+    if ($request->has('image_path')) {
+        
+        $image_path = $request->file('image_path')->store('website_img');
+        $image_link = $request->input('image_link');
+        
+
+            websiteImg::create([
+            'link' =>  $image_link,
+            'image_path' => $image_path,
+            'type' => 'scheme',
+        ]);
+
+       
+        $response = [
+
+            'success' => true,
+            'message' => "upload Scheme successfully",
+
+        ];
+        return response()->json($response, 201);
+    }
+
+    $response = [
+
+        'success' => true,
+        'message' => "file not upload",
+
+    ];
+    return response()->json($response, 400);
+
+
+}
 
 }

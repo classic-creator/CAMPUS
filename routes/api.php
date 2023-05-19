@@ -81,9 +81,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
 // admin protected routes
 Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
     
-    Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
-    Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
-    Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
+    // Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
+    // Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
     Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
 
 
@@ -96,7 +95,7 @@ Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
 // manager protected routes
 Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     
-    Route::put('/college/staff/update', [UniversityController::class, 'updateCollegeDetails']);
+    Route::put('/college/update', [UniversityController::class, 'updateCollegeDetails']);
     Route::get('/college/staff/profile',[UniversityController::class,'getMyCollegeDetails']);
     Route::delete('/college/staff/delete', [UniversityController::class, 'deleteCollege']);
     Route::post('/college/course/register/{id}', [CoursesController::class, 'courseRegister']);
@@ -125,7 +124,13 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::delete('/delete/notic/{id}', [UniversityController::class, 'deleteNotice']);
     Route::get('/get/notic', [UniversityController::class, 'GetCollegeNots']);
     Route::post('/carousel/upload', [CollegeImageController::class, 'addCarousel']);
+    Route::post('/scheme/upload', [CollegeImageController::class, 'addScheme']);
     Route::delete('/carousel/delete/{id}', [CollegeImageController::class, 'DeleteCarouselImage']);
+    Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
+    Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
+    Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
+
+
 });
 
 

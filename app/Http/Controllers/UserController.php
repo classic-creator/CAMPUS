@@ -28,7 +28,7 @@ public function register(Request $request){
    if ($validator->fails()) {
        $response=[
            'success'=>false,
-           'message'=>$validator->errors()
+           'message'=>$validator->errors()->first()
        ];
        return response()->json($response,400);
    } 
@@ -155,9 +155,14 @@ public function getAllUsersAdmin(Request $request){
 
     $users=User::all();
     $usersCount = $users->count();
+
+    foreach ($users as $photo) {
+        $photo->image_url = $photo->profile ? url($photo->profile) : null;
+    }
+
     $response = [
         'success' => true,
-        'Total-users' => $usersCount,
+        'Total_users' => $usersCount,
         'users' => $users,
     ];
     return response()->json($response, 200);

@@ -417,13 +417,13 @@ class UniversityController extends Controller
         $validator = Validator::make($request->all(), [
 
             'collegeName' => 'required',
-            'address' => 'required',
-            'description' => 'required'
+            'rating' => 'required',
+            'address' => 'required'
         ]);
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'message' => $validator->errors()->first()
             ];
             return response()->json($response, 400);
         }
@@ -433,13 +433,13 @@ class UniversityController extends Controller
         $college->update([
             "collegeName" => $request->input('collegeName'),
             "address" => $request->input('address'),
-            "description" => $request->input('description'),
+            "rating" => $request->input('rating'),
         ]);
         $college->save();
 
         $response = [
             'success' => true,
-            $college,
+              'message' =>'Update College SuccessFully',
 
         ];
         return response()->json($response, 200);
