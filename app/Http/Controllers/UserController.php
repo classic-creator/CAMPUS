@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admission;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\StudentPersonalDetails;
@@ -173,23 +174,37 @@ public function getAllUsersAdmin(Request $request){
 public function updateUsersAdmin(Request $request,$id){
 
     $user=User::where('id',$id)->first();
+    if($user->type=='manager'){
+        $response=[
+            'success'=>false,
+            'message'=>'Manager account not be updated into admin/user'
+
+        ];
+
+        return response()->json($response,400);
+    }
 
     $validator=Validator::make($request->all(),[
       
-        'type'=>'required|numeric',
+        'type'=>'required',
         
     ]);
     if($validator->fails()){
         $response=[
             'success'=>false,
-            'message'=>$validator->errors()
+            'message'=>$validator->errors()->first()
         ];
         return response()->json($response,400);
     };
 
       
-      $user->type=$request->type;
-      $user->save();
+    //   $user->type=$request->type;
+    //   $user->save();
+
+    $user->update([
+        'type'=> $request->input('type')=='admin' ? 1 :0
+    
+    ]);
 
       $response=[
         'success'=>true,
@@ -241,6 +256,23 @@ public function updateProfile(Request $request){
     ];
     return response()->json($response,200);
 }
+
+//get all user count and applications counts
+
+public function getAllStudentandApplication(Request $request){
+
+    $users=User::where('type','user');
+    $usersCount = $users->count();
+    $applications=Admission::all()->count();
+
+    $response = [
+        'success' => true,
+        'Total_users' => $usersCount,
+        'application_count'=>$applications
+    ];
+    return response()->json($response, 200);
+}
+
 
 
 

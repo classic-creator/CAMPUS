@@ -333,8 +333,6 @@ public function DeleteCarouselImage(Request $request,$id){
 }
 
 // super admin educational scheme upload 
-
-
 public function addScheme(Request $request){
 
     $validator = Validator::make($request->all(), [
@@ -380,6 +378,26 @@ public function addScheme(Request $request){
 
     ];
     return response()->json($response, 400);
+
+
+}
+
+// super admin educational scheme get 
+public function GetScheme(Request $request){
+
+   
+    $photos = websiteImg::where('type', '=', 'scheme')->get();
+        
+    foreach ($photos as $photo) {
+        $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
+    }
+
+    $response=[
+        'success'=>true,
+        'scheme'=>$photos
+    ];
+    return response()->json($response,200);
+
 
 
 }

@@ -43,6 +43,7 @@ Route::get('/college/course/{id}',[CoursesController::class,'getCourseDetails'])
 Route::get('/get/razorpay/key', [NewPaymentController::class, 'getRezorpayKey']);
 
 Route::post('/payment/varification', [NewPaymentController::class, 'PaymentVerification']);
+Route::get('/count', [UserController::class, 'getAllStudentandApplication']);
 //login protected routes
 Route::middleware(['auth:sanctum'])->group(function(){
    
@@ -51,7 +52,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/logout',[UserController::class,'logout']);
     Route::get('/getProfile',[UserController::class,'getProfile']);
     Route::put('/changepassword',[UserController::class,'changePassword']);
-    Route::post('/collegeregister', [UniversityController::class, 'registerCollege']);
+    // Route::post('/collegeregister', [UniversityController::class, 'registerCollege']);
+    Route::post('/collegeregister', [UniversityController::class, 'registerCollegeRequest']);
+    
+
     Route::post('/Profile/update', [UserController::class, 'updateProfile']);
     Route::post('/apply/course/{id}', [AdmissionController::class, 'applyAdmission']);
     Route::post('/add/preference', [PreferenceController::class, 'addPreference']);
@@ -82,9 +86,20 @@ Route::middleware(['auth:sanctum'])->group(function(){
 Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
     
     // Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
+    Route::get('/admin/approve/colleges',[UniversityController::class,'getAllCollegeRequest']);
+    Route::post('/admin/colleges/register',[UniversityController::class,'registerApproveCollege']);
     // Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
-    Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
+    // Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
 
+    Route::post('/carousel/upload', [CollegeImageController::class, 'addCarousel']);
+    Route::post('/scheme/upload', [CollegeImageController::class, 'addScheme']);
+    Route::get('/scheme/get', [CollegeImageController::class, 'GetScheme']);
+
+    Route::delete('/carousel/delete/{id}', [CollegeImageController::class, 'DeleteCarouselImage']);
+    Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
+    Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
+    Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
+    Route::put('/admin/users/{id}',[UserController::class,'updateUsersAdmin']);
 
     
 });
@@ -123,13 +138,8 @@ Route::middleware(['auth:sanctum','user-access:manager'])->group(function(){
     Route::post('/add/notic', [UniversityController::class, 'AddNotice']);
     Route::delete('/delete/notic/{id}', [UniversityController::class, 'deleteNotice']);
     Route::get('/get/notic', [UniversityController::class, 'GetCollegeNots']);
-    Route::post('/carousel/upload', [CollegeImageController::class, 'addCarousel']);
-    Route::post('/scheme/upload', [CollegeImageController::class, 'addScheme']);
-    Route::delete('/carousel/delete/{id}', [CollegeImageController::class, 'DeleteCarouselImage']);
-    Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
-    Route::get('/admin/colleges',[UniversityController::class,'getAllCollegeAdmin']);
-    Route::get('/admin/colleges/{id}',[UniversityController::class,'getAllCollegeDetailsAdmin']);
-
+   
+  
 
 });
 

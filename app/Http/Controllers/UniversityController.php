@@ -7,6 +7,7 @@ use App\Models\collegeImage;
 use App\Models\Courses;
 use App\Models\Links;
 use App\Models\Preference;
+use App\Models\UniversityRequest;
 use App\Models\Universitys;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,8 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 class UniversityController extends Controller
 {
-    //register College 
-    public function registerCollege(Request $request)
+
+
+    //register request to admin  (send request by user)
+    public function registerCollegeRequest(Request $request)
     {
 
         //validate
@@ -33,14 +36,14 @@ class UniversityController extends Controller
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'message' => $validator->errors()->first()
 
             ];
             return response()->json($response, 404);
         }
         $user = $request->user();
 
-        $type = $user['type'];
+      
 
         if ($user['type'] == 'admin') /*|| Universitys::where("create-by", $user['id'])->exists() )*/{ //one user can add only one college and admin account not add college
             $response = [
@@ -50,7 +53,7 @@ class UniversityController extends Controller
             return response()->json($response, 401);
         }
 
-        $college = Universitys::create([
+        $college = UniversityRequest::create([
             'collegeName' => $request->collegeName,
             'address' => $request->address,
             'email' => $request->email,
@@ -58,26 +61,166 @@ class UniversityController extends Controller
             'description' => $request->description,
             'create-by' => $user['id'],
         ]);
-
-
-        if ($type == 'user') {
-
-            $user->update([
-                "type" => '2',
-            ]);
-        }
-        $user->save();
-
-
+                $user->update([
+                        $user->user_role=> 'waiting',
+                    ]);
+                
+                $user->save();
+        
+          
         $response = [
 
             'success' => true,
-            'message' => "registration success",
+            'message' => "Request send success",
             'college' => $college
 
         ];
         return response()->json($response, 201);
     }
+
+    //get all college register request  (get college for approval)
+
+    public function getAllCollegeRequest(Request $request)
+    {
+     
+      $colleges= UniversityRequest::all();
+
+        if (!$colleges) {
+
+            $response = [
+                'success' => false,
+                'message' => 'No college found'
+            ];
+            return response()->json($response, 200);
+        }
+
+     
+        $collegCounts = $colleges->count();
+
+        $response = [
+            'success' => true,
+            'collegeCount' => $collegCounts,
+            'colleges' => $colleges,
+        ];
+        return response()->json($response, 200);
+
+
+    }
+
+
+//Aprove college request  (create colleges)
+public function registerApproveCollege(Request $request)
+
+{
+
+    $user = User::where('id', $request->user_id)->first();
+
+    $type = $user['type'];
+
+    if ($user['type'] == 'admin') /*|| Universitys::where("create-by", $user['id'])->exists() )*/{ //one user can add only one college and admin account not add college
+        $response = [
+            'seccess' => false,
+            'message' => 'you are not eligible for register college '
+        ];
+        return response()->json($response, 401);
+    }
+
+   Universitys::create([
+        'collegeName' => $request->name,
+        'address' => $request->district,
+        'email' => $request->email,
+        'rating' => $request->rating,
+        'description' => $request->description,
+        'create-by' => $user['id'],
+    ]);
+
+
+  
+
+        $user->update([
+            "type" => '2',
+        ]);
+ 
+    $user->save();
+
+
+    UniversityRequest::where('create-by',$user['id'])->delete();
+
+
+    $response = [
+
+        'success' => true,
+        'message' => "registration success",
+        // 'college' => $college
+
+    ];
+    return response()->json($response, 201);
+}
+
+
+    //register College 
+    // public function registerCollege(Request $request)
+    // {
+
+    //     //validate
+    //     $validator = Validator::make($request->all(), [
+
+    //         'collegeName' => 'required',
+    //         'address' => 'required',
+    //         'email' => 'required|email|unique:universitys',
+    //         'rating' => 'required',
+    //         'description' => 'required',
+
+
+    //     ]);
+    //     if ($validator->fails()) {
+    //         $response = [
+    //             'success' => false,
+    //             'message' => $validator->errors()
+
+    //         ];
+    //         return response()->json($response, 404);
+    //     }
+    //     $user = $request->user();
+
+    //     $type = $user['type'];
+
+    //     if ($user['type'] == 'admin') /*|| Universitys::where("create-by", $user['id'])->exists() )*/{ //one user can add only one college and admin account not add college
+    //         $response = [
+    //             'seccess' => false,
+    //             'message' => 'you are not eligible for register college '
+    //         ];
+    //         return response()->json($response, 401);
+    //     }
+
+    //     $college = Universitys::create([
+    //         'collegeName' => $request->collegeName,
+    //         'address' => $request->address,
+    //         'email' => $request->email,
+    //         'rating' => $request->rating,
+    //         'description' => $request->description,
+    //         'create-by' => $user['id'],
+    //     ]);
+
+
+    //     if ($type == 'user') {
+
+    //         $user->update([
+    //             "type" => '2',
+    //         ]);
+    //     }
+    //     $user->save();
+
+
+    //     $response = [
+
+    //         'success' => true,
+    //         'message' => "registration success",
+    //         'college' => $college
+
+    //     ];
+    //     return response()->json($response, 201);
+    // }
 
     //get all college for public
     public function getAllCollege(Request $request)
