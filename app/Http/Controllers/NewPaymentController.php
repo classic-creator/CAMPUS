@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\Universitys;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\Courses;
 use App\Models\NewPayment;
@@ -515,4 +516,44 @@ class NewPaymentController extends Controller
 
 
   }
+
+    //view pdf 
+    public function paymentReciept(Request $request , $id){
+
+      // $admission=Admission::where('id',$id)->first();
+      $payment=Payment::select('payments.*','new_payments.amount','new_payments.fees_type','courses.courseName','universitys.collegeName','universitys.email as clgEmail','users.name','users.email as userEmail','users.phon_no')
+      ->join('new_payments','new_payments.id','payments.fees_id')
+      ->join('courses','courses.id','=','new_payments.course_id')
+      ->join('users','users.id','=','payments.student_id')
+      ->join('universitys','universitys.id','=','courses.college_id')
+      // ->join('addresses','addresses.student_id','=','users.id')
+      ->where('payments.id',$id)->first();
+
+   
+
+      return view('payments.details',compact('payment'));
+  }
+  //view pdf 
+  public function paymentRecieptDownload(Request $request , $id){
+
+      // $admission=Admission::where('id',$id)->first();
+
+
+      $payment=Payment::select('payments.*','new_payments.amount','new_payments.fees_type','courses.courseName','universitys.collegeName','universitys.email as clgEmail','users.name','users.email as userEmail','users.phon_no')
+      ->join('new_payments','new_payments.id','payments.fees_id')
+      ->join('courses','courses.id','=','new_payments.course_id')
+      ->join('users','users.id','=','payments.student_id')
+      ->join('universitys','universitys.id','=','courses.college_id')
+      // ->join('addresses','addresses.student_id','=','users.id')
+      ->where('payments.id',$id)->first();
+
+      $data=['payment'=>$payment];
+
+      $pdf=Pdf::loadView('payments.details',$data);
+      $todayData=Carbon::now()->format('d-m-y');
+
+      return $pdf->download('Reciept-'.$payment->$id.'-'.$todayData.'.pdf');
+
+  }
+
 }

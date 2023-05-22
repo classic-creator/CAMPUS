@@ -11,6 +11,7 @@ class UniversityRequest extends Model
     protected $fillable = [
         'collegeName',
         'address',
+        'city',
         'email',
         'rating',
         'description',

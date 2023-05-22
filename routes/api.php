@@ -79,8 +79,12 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/process/payment/{id}',[NewPaymentController::class,'processPayments']);
     Route::get('/payment/history/{id}',[NewPaymentController::class,'getStudentPaymenthistory']);
     
-  
+    
 });
+Route::get('/view/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgement']);
+Route::get('/download/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgementDownload']);
+Route::get('/view/reciept/{id}',[NewPaymentController::class,'paymentReciept']);
+Route::get('/download/reciept/{id}',[NewPaymentController::class,'paymentRecieptDownload']);
 
 // admin protected routes
 Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){

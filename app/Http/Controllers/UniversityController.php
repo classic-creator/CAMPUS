@@ -30,6 +30,7 @@ class UniversityController extends Controller
             'email' => 'required|email|unique:universitys',
             'rating' => 'required',
             'description' => 'required',
+            'city' => 'required',
 
 
         ]);
@@ -59,10 +60,11 @@ class UniversityController extends Controller
             'email' => $request->email,
             'rating' => $request->rating,
             'description' => $request->description,
+            'city' => $request->city,
             'create-by' => $user['id'],
         ]);
                 $user->update([
-                        $user->user_role=> 'waiting',
+                        'user_role'=> 'waiting',
                     ]);
                 
                 $user->save();
@@ -128,6 +130,7 @@ public function registerApproveCollege(Request $request)
    Universitys::create([
         'collegeName' => $request->name,
         'address' => $request->district,
+        'city' => $request->city,
         'email' => $request->email,
         'rating' => $request->rating,
         'description' => $request->description,
@@ -139,7 +142,11 @@ public function registerApproveCollege(Request $request)
 
         $user->update([
             "type" => '2',
+            'user_role'=> 'instituteAdmin',
         ]);
+      
+    
+
  
     $user->save();
 
@@ -233,7 +240,7 @@ public function registerApproveCollege(Request $request)
             ->select('universitys.*', 'college_images.image_path');
 
         if ($keyword = $request->input('keyword')) {
-            $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'");
+            $colleges->WhereRaw("collegeName LIKE '%" . $keyword . "%'")->orWhereRaw("address LIKE '%" . $keyword . "%'")->orWhereRaw("city LIKE '%" . $keyword . "%'");
         }
 
 
@@ -320,65 +327,11 @@ public function registerApproveCollege(Request $request)
         return response()->json($response, 200);
 
     }
-    //get college details for public
-    //  public function getCollegeDetails(Request $request, $id)
-    // {
-    //     $college = Universitys::join('college_images', 'college_images.college_id', '=', 'universitys.id')
-    //         ->select(
-    //             'universitys.id as college_id','universitys.collegeName','universitys.address','universitys.description','universitys.rating',
-    //             'college_images.image_path as cover_image_path',
-    //             DB::raw("(SELECT image_path FROM college_images WHERE college_id = $id AND type = 'logo') as logo_image_path")
-    //         )
-    //         ->where('universitys.id', $id)
-    //         ->where('college_images.type', 'cover')
-    //         ->first();
-
-    //     if (!$college) {
-    //         $response = [
-    //             'success' => false,
-    //             'message' => "college not found"
-    //         ];
-    //         return response()->json($response, 200);
-    //     }
-    //     $course = DB::table('courses')
-    //     ->select('courses.*','depertments.depertment_name','seat_structures.OBC',
-    //     'seat_structures.SC',
-    //     'seat_structures.ST',
-    //     'seat_structures.open',
-    //     'seat_structures.total_seat',
-    //     'seat_structures.EWS',
-    //     'seat_structures.other',)
-    //     ->join('depertments' ,'depertments.id','=','courses.depertment_id')
-    //     ->leftJoin('seat_structures', 'seat_structures.course_id', '=', 'courses.id')
-    //     ->where('courses.college_id', $college->college_id)
-    //     ->get();
-
-    //     $photos = collegeImage::where('college_id', $id)->where('type', '=', 'other')->get();
-
-    //     foreach ($photos as $photo) {
-    //         // $college->image_url = $college->image_path ? url('public/' . $college->image_path) : null;
-    //         $photo->image_url = $photo->image_path ? url($photo->image_path) : null;
-
-    //     }
-
-       
-    //     $college->cover_image_url = $college->cover_image_path ? url($college->cover_image_path) : null;
-    //     $college->logo_image_url = $college->logo_image_path ? url($college->logo_image_path) : null;
-
-
-    //     $response = [
-    //         'success' => true,
-    //         'college' => $college,
-    //         'courses' => $course,
-    //         'photos' => $photos
-    //     ];
-    //     return response()->json($response, 200);
-    // } 
-
+   
     public function getCollegeDetails(Request $request, $id)
 {
     $college = Universitys::select(
-        'universitys.id as college_id', 'universitys.collegeName', 'universitys.address', 'universitys.description', 'universitys.rating'
+        'universitys.id as college_id', 'universitys.collegeName', 'universitys.address','universitys.city', 'universitys.description', 'universitys.rating'
     )
         ->where('universitys.id', $id)
         ->first();
@@ -561,7 +514,9 @@ public function registerApproveCollege(Request $request)
 
             'collegeName' => 'required',
             'rating' => 'required',
-            'address' => 'required'
+            'address' => 'required',
+            'city' => 'required',
+            'description' => 'required'
         ]);
         if ($validator->fails()) {
             $response = [
@@ -577,6 +532,8 @@ public function registerApproveCollege(Request $request)
             "collegeName" => $request->input('collegeName'),
             "address" => $request->input('address'),
             "rating" => $request->input('rating'),
+            "description" => $request->input('description'),
+            "city" => $request->input('city'),
         ]);
         $college->save();
 

@@ -11,10 +11,14 @@ use App\Models\StudentPersonalDetails;
 use App\Models\StudentsFilesDetails;
 use App\Models\Universitys;
 use App\Models\Address;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Message;
+use Storage;
+use Symfony\Component\HttpFoundation\Response;
 use Validator;
 
 class AdmissionController extends Controller
@@ -428,6 +432,51 @@ class AdmissionController extends Controller
 
     }
 
-    //file upload 
+    //view pdf 
+    public function AdmissionAcknowladgement(Request $request , $id){
+
+        // $admission=Admission::where('id',$id)->first();
+
+
+        $admission = Admission::select('admissions.id', 'admissions.admission_status', 'admissions.apply_payment_status', 'admissions.admission_payment_status','admissions.student_id', 'admissions.created_at',  'universitys.address as clgAdress','admissions.course_id', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_educational_details.class10_school', 'student_educational_details.class10_roll',  'student_educational_details.class10_passingYear', 'student_educational_details.class12_passingYear','student_educational_details.class10_no', 'student_educational_details.class10_totalMark', 'student_educational_details.class10_markObtain', 'student_educational_details.class12_college', 'student_educational_details.class10_school','student_educational_details.class12_strem', 'student_educational_details.class12_board', 'student_educational_details.class12_totalMark', 'student_educational_details.class12_markObtain', 'student_educational_details.class12_roll', 'student_educational_details.class12_no', 'student_personal_data.email', 'student_personal_data.identification','student_personal_data.identification_no',  'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.phon_no','student_personal_data.mark_obtain_lastExam', 'student_personal_data.qualification', 'students_files_details.profile_photo', 'students_files_details.aadhar', 'students_files_details.signature', 'students_files_details.hslc_registation', 'students_files_details.hslc_marksheet', 'students_files_details.hslc_certificate', 'students_files_details.hslc_admit', 'students_files_details.hsslc_registation', 'students_files_details.hsslc_marksheet', 'students_files_details.hsslc_certificate', 'students_files_details.hsslc_admit','addresses.state','addresses.district','addresses.sub_district','addresses.pin_no')
+        ->join('users', 'users.id', '=', 'admissions.student_id')
+        ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+        ->join('courses', 'courses.id', '=', 'admissions.course_id')
+        ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+        ->join('students_files_details', 'students_files_details.id', '=', 'admissions.files_id')
+        ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+        ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+        ->where('admissions.id', $id)
+        // ->where('admissions.college_id', $college['id'])
+        ->first();
+
+        return view('admission.details-pdf',compact('admission'));
+    }
+    //view pdf 
+    public function AdmissionAcknowladgementDownload(Request $request , $id){
+
+        // $admission=Admission::where('id',$id)->first();
+
+
+        $admission = Admission::select('admissions.id', 'admissions.admission_status', 'admissions.apply_payment_status', 'admissions.admission_payment_status','admissions.student_id', 'admissions.created_at',  'universitys.address as clgAdress','admissions.course_id', 'users.name', 'universitys.collegeName', 'courses.courseName', 'student_educational_details.class10_board', 'student_educational_details.class10_school', 'student_educational_details.class10_roll',  'student_educational_details.class10_passingYear', 'student_educational_details.class12_passingYear','student_educational_details.class10_no', 'student_educational_details.class10_totalMark', 'student_educational_details.class10_markObtain', 'student_educational_details.class12_college', 'student_educational_details.class10_school','student_educational_details.class12_strem', 'student_educational_details.class12_board', 'student_educational_details.class12_totalMark', 'student_educational_details.class12_markObtain', 'student_educational_details.class12_roll', 'student_educational_details.class12_no', 'student_personal_data.email', 'student_personal_data.identification','student_personal_data.identification_no',  'student_personal_data.first_name', 'student_personal_data.middle_name', 'student_personal_data.last_name', 'student_personal_data.phon_no','student_personal_data.mark_obtain_lastExam', 'student_personal_data.qualification', 'students_files_details.profile_photo', 'students_files_details.aadhar', 'students_files_details.signature', 'students_files_details.hslc_registation', 'students_files_details.hslc_marksheet', 'students_files_details.hslc_certificate', 'students_files_details.hslc_admit', 'students_files_details.hsslc_registation', 'students_files_details.hsslc_marksheet', 'students_files_details.hsslc_certificate', 'students_files_details.hsslc_admit','addresses.state','addresses.district','addresses.sub_district','addresses.pin_no')
+        ->join('users', 'users.id', '=', 'admissions.student_id')
+        ->join('universitys', 'universitys.id', '=', 'admissions.college_id')
+        ->join('courses', 'courses.id', '=', 'admissions.course_id')
+        ->join('addresses', 'addresses.id', '=', 'admissions.address_id')
+        ->join('students_files_details', 'students_files_details.id', '=', 'admissions.files_id')
+        ->join('student_educational_details', 'student_educational_details.id', '=', 'admissions.educationalDetails_id')
+        ->join('student_personal_data', 'student_personal_data.id', '=', 'admissions.personalDetails_id')
+        ->where('admissions.id', $id)
+        // ->where('admissions.college_id', $college['id'])
+        ->first();
+
+        $data=['admission'=>$admission];
+
+        $pdf=Pdf::loadView('admission.details-pdf',$data);
+        $todayData=Carbon::now()->format('d-m-y');
+
+        return $pdf->download('Acknowledgement-'.$admission->$id.'-'.$todayData.'.pdf');
+
+    }
 
 }
