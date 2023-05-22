@@ -401,6 +401,7 @@ class NewPaymentController extends Controller
 
     $Payments = Payment::select(
       'payments.payment_id',
+      'payments.id',
       'payments.fees_id',
       'payments.payment_status',
       'payments.created_at',

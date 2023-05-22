@@ -98,7 +98,7 @@ class CoursesController extends Controller
     {
 
         $course = DB::table('courses')
-            ->select('courses.id', 'courses.courseName', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'universitys.address')
+            ->select('courses.id', 'courses.courseName', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'universitys.address','universitys.city')
             ->join('universitys', 'universitys.id', '=', 'courses.college_id')->join('depertments', 'depertments.id', '=', 'courses.depertment_id');
 
 

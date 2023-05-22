@@ -26,6 +26,7 @@
         .brand-section{
            background-color: #0d1033;
            padding: 10px 40px;
+           height:15%
         }
         .logo{
             width: 50%;
