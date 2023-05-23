@@ -44,6 +44,12 @@ Route::get('/get/razorpay/key', [NewPaymentController::class, 'getRezorpayKey'])
 
 Route::post('/payment/varification', [NewPaymentController::class, 'PaymentVerification']);
 Route::get('/count', [UserController::class, 'getAllStudentandApplication']);
+Route::get('/view/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgement']);
+Route::get('/download/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgementDownload']);
+Route::get('/view/reciept/{id}',[NewPaymentController::class,'paymentReciept']);
+Route::get('/download/reciept/{id}',[NewPaymentController::class,'paymentRecieptDownload']);
+Route::get('/scheme/get', [CollegeImageController::class, 'GetScheme']);
+
 //login protected routes
 Route::middleware(['auth:sanctum'])->group(function(){
    
@@ -81,10 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     
     
 });
-Route::get('/view/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgement']);
-Route::get('/download/pdf/{id}',[AdmissionController::class,'AdmissionAcknowladgementDownload']);
-Route::get('/view/reciept/{id}',[NewPaymentController::class,'paymentReciept']);
-Route::get('/download/reciept/{id}',[NewPaymentController::class,'paymentRecieptDownload']);
+
 
 // admin protected routes
 Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
@@ -97,7 +100,6 @@ Route::middleware(['auth:sanctum','user-access:admin'])->group(function(){
 
     Route::post('/carousel/upload', [CollegeImageController::class, 'addCarousel']);
     Route::post('/scheme/upload', [CollegeImageController::class, 'addScheme']);
-    Route::get('/scheme/get', [CollegeImageController::class, 'GetScheme']);
 
     Route::delete('/carousel/delete/{id}', [CollegeImageController::class, 'DeleteCarouselImage']);
     Route::get('/admin/users',[UserController::class,'getAllUsersAdmin']);
