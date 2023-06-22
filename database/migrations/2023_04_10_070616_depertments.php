@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('depertment_name');
             $table->string('depertment_email');
             $table->string('instructor');
-            $table->string('description');
+            $table->text('description');
             $table->timestamps();
         });
     }

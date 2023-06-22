@@ -19,6 +19,7 @@ class Courses extends Model
         'eligibility',
         'seat_capacity',
         'vacent_seat',
+        'active',
       
        
     ];

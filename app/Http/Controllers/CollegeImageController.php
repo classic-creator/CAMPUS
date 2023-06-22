@@ -338,7 +338,8 @@ public function addScheme(Request $request){
     $validator = Validator::make($request->all(), [
 
         'image_path' => 'required|image',
-        'image_link'=>'required'
+        'image_link'=>'required',
+        'name'=>'required'
     ]);
 
     if ($validator->fails()) {
@@ -359,6 +360,7 @@ public function addScheme(Request $request){
             'link' =>  $image_link,
             'image_path' => $image_path,
             'type' => 'scheme',
+            'name' => $request->input('name'),
         ]);
 
        

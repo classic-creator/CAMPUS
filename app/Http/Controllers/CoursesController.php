@@ -60,7 +60,7 @@ class CoursesController extends Controller
             'duration' => $request->duration,
             'eligibility' => $request->eligibility,
             'seat_capacity' => $request->seat_capacity,
-            'vacent_seat'=>$request->seat_capacity,
+            'vacent_seat' => $request->seat_capacity,
             'college_id' => $college['id'],
             'depertment_id' => $depertment['id']
         ]);
@@ -94,12 +94,15 @@ class CoursesController extends Controller
     }
 
     //get all courses public
-    public function getAllCourses(Request $request) 
+    public function getAllCourses(Request $request)
     {
 
         $course = DB::table('courses')
-            ->select('courses.id', 'courses.courseName', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'universitys.address','universitys.city')
-            ->join('universitys', 'universitys.id', '=', 'courses.college_id')->join('depertments', 'depertments.id', '=', 'courses.depertment_id');
+            ->select('courses.id', 'courses.courseName', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'courses.active','universitys.address', 'universitys.city')
+            
+            ->join('universitys', 'universitys.id', '=', 'courses.college_id')
+            ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
+            ->where('courses.active',1);
 
 
         //search
@@ -117,6 +120,7 @@ class CoursesController extends Controller
 
         $courses = $course->get();
 
+
         if (!$courses) {
 
             $response = [
@@ -127,7 +131,8 @@ class CoursesController extends Controller
         }
         $response = [
             'success' => true,
-            'courses' => $courses
+            'total_courses'=> $courses->count(),
+            'courses' => $courses,
         ];
         return response()->json($response, 200);
 
@@ -139,99 +144,49 @@ class CoursesController extends Controller
     {
         $user = $request->user();
 
-        // $preference = Preference::where("student_id", $user['id'])->first();
+    
+        $preference = Preference::where("student_id", $user['id'])->first();
 
-        // if (!$preference) {
-        //     $response = [
-        //         'success' => false,
-        //         'message' => "Please update Preference",
-        //     ];
-        //     return response()->json($response, 200);
-        
+        if (!$preference) {
+            $response = [
+                'success' => false,
+                'message' => "Please update Preference",
+            ];
+            return response()->json($response, 200);
+        }
 
-
-
-        //for 3 college
-// $course = DB::table('courses')
-//     ->join('universitys', 'courses.college_id', '=', 'universitys.id')
-//     ->join('depertments','depertments.id','=','courses.depertment_id')
-//     ->select('courses.*', 'universitys.collegeName','depertments.depertment_name')
-//     ->where(function ($query) use ($preference) {
-//         $query->where(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course1']))
-//             ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course2']))
-//             ->orWhere(DB::raw('LOWER(courseName)'), 'LIKE', strtolower($preference['course3']));
-//     })
-//     ->when(!empty($preference['college1']), function ($query) use ($preference) {
-//         return $query->where('universitys.collegeName', '=', $preference['college1']);
-//     })  
-//     ->when(!empty($preference['college2']), function ($query) use ($preference) {
-//         return $query->orWhere(function ($query) use ($preference) {
-//             $query->where('universitys.collegeName', '=', $preference['college2'])
-//                   ->whereIn(DB::raw('LOWER(courseName)'), array_map('strtolower', [
-//                       $preference['course1'],
-//                       $preference['course2'],
-//                       $preference['course3'],
-//                   ]));
-//         });
-//     })
-//     ->when(!empty($preference['college3']), function ($query) use ($preference) {
-//         return $query->orWhere(function ($query) use ($preference) {
-//             $query->where('universitys.collegeName', '=', $preference['college3'])
-//                   ->whereIn(DB::raw('LOWER(courseName)'), array_map('strtolower', [
-//                       $preference['course1'],
-//                       $preference['course2'],
-//                       $preference['course3'],
-//                   ]));
-//         });
-//     })
-//     ->orderBy('courses.id')
-//     ->get();
+        $college1 = $preference['college1'] === 'null' ? null : $preference['college1'];
+        $course1 = $preference['course1'] === 'null' ? null : $preference['course1'];
+        $depertment1 = $preference['depertment1'] === 'null' ? null : $preference['depertment1'];
 
 
-// $college1 = $preference->pluck('college1')->filter()->map(fn($value) => $value === 'null' ? null : strtolower($value));
-// $depertment1 = $preference->pluck('depertment1')->filter()->map(fn($value) => $value === 'null' ? null : strtolower($value));
-// $course1 = $preference->pluck('course1')->filter()->map(fn($value) => $value === 'null' ? null : strtolower($value));
-$preference = Preference::where("student_id", $user['id'])->first();
-
-if (!$preference) {
-    $response = [
-        'success' => false,
-        'message' => "Please update Preference",
-    ];
-    return response()->json($response, 200);
-}
-
-$college1 = $preference['college1'] === 'null' ? null : $preference['college1'];
-$course1 = $preference['course1'] === 'null' ? null : $preference['course1'];
-$depertment1 = $preference['depertment1'] === 'null' ? null : $preference['depertment1'];
-        
-
-$query = DB::table('courses')
-    ->join('universitys', 'courses.college_id', '=', 'universitys.id')
-    ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
-    ->select('courses.*', 'universitys.collegeName', 'universitys.address', 'depertments.depertment_name');
+        $query = DB::table('courses')
+            ->join('universitys', 'courses.college_id', '=', 'universitys.id')
+            ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
+            ->select('courses.*', 'universitys.collegeName', 'universitys.address', 'depertments.depertment_name')
+            ->where('courses.active',1);
 
 
-if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($depertment1) && !empty($course1)){
-    $query->where('universitys.collegeName', 'LIKE', "%$college1%")
-        ->where('depertments.depertment_name', 'LIKE', "%$depertment1%")
-        ->where('courses.courseName', 'LIKE', "%$course1%");
-} else if (isset($college1, $depertment1) && !empty($college1) && !empty($depertment1) && empty($course1)) {
-    $query->where('universitys.collegeName', 'LIKE', "%$college1%")
-        ->where('depertments.depertment_name', 'LIKE', "%$depertment1%");
-} else if (isset($college1, $course1) && !empty($college1) && !empty($course1) && empty($depertment1)) {
-    $query->where('universitys.collegeName', 'LIKE', "%$college1%")
-        ->where('courses.courseName', 'LIKE', "%$course1%");
-} else if (isset($depertment1, $course1) && !empty($depertment1) && !empty($course1) && empty($college1)) {
-    $query->where('depertments.depertment_name', 'LIKE', "%$depertment1%")
-        ->where('courses.courseName', 'LIKE', "%$course1%");
-} else if (isset($college1) && !empty($college1) && empty($depertment1) && empty($course1)) {
-    $query->where('universitys.collegeName', 'LIKE', "%$college1%");
-} else if (isset($depertment1) && !empty($depertment1) && empty($course1) && empty($college1)) {
-    $query->where('depertments.depertment_name', 'LIKE', "%$depertment1%");
-} else if (isset($course1) && !empty($course1) && empty($depertment1) && empty($college1)) {
-    $query->where('courses.courseName', 'LIKE', "%$course1%");
-}
+        if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($depertment1) && !empty($course1)) {
+            $query->where('universitys.collegeName', 'LIKE', "%$college1%")
+                ->where('depertments.depertment_name', 'LIKE', "%$depertment1%")
+                ->where('courses.courseName', 'LIKE', "%$course1%");
+        } else if (isset($college1, $depertment1) && !empty($college1) && !empty($depertment1) && empty($course1)) {
+            $query->where('universitys.collegeName', 'LIKE', "%$college1%")
+                ->where('depertments.depertment_name', 'LIKE', "%$depertment1%");
+        } else if (isset($college1, $course1) && !empty($college1) && !empty($course1) && empty($depertment1)) {
+            $query->where('universitys.collegeName', 'LIKE', "%$college1%")
+                ->where('courses.courseName', 'LIKE', "%$course1%");
+        } else if (isset($depertment1, $course1) && !empty($depertment1) && !empty($course1) && empty($college1)) {
+            $query->where('depertments.depertment_name', 'LIKE', "%$depertment1%")
+                ->where('courses.courseName', 'LIKE', "%$course1%");
+        } else if (isset($college1) && !empty($college1) && empty($depertment1) && empty($course1)) {
+            $query->where('universitys.collegeName', 'LIKE', "%$college1%");
+        } else if (isset($depertment1) && !empty($depertment1) && empty($course1) && empty($college1)) {
+            $query->where('depertments.depertment_name', 'LIKE', "%$depertment1%");
+        } else if (isset($course1) && !empty($course1) && empty($depertment1) && empty($college1)) {
+            $query->where('courses.courseName', 'LIKE', "%$course1%");
+        }
 
         $course = $query->get();
 
@@ -372,15 +327,21 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
     {
 
         $user = $request->user();
+        $universitys=Universitys::where('create-by',$user->id)->first();
 
-        
+        if (!$universitys) {
+            $response = [
+                'success' => false,
+                'message' => "institute not found"
+            ];
+            return response()->json($response, 200);
+        }
+        ;
 
         $course = Courses::
-        // join('universitys','universitys.id','=','courses.college_id')
-        // ->where('universitys.create-by',$user['id'])
-        where('courses.id', $id)
-        ->first();
-        // $course = DB::table('courses')->find($courseid);
+            where('courses.id', $id)
+            ->where('college_id',$universitys['id'])
+            ->first();
 
         if (!$course) {
             $response = [
@@ -394,41 +355,42 @@ if (isset($college1, $depertment1, $course1) && !empty($college1) && !empty($dep
         $validator = Validator::make($request->all(), [
 
             'courseName' => 'required',
-
             'duration' => 'required|numeric',
             'eligibility' => 'required',
             'seat_capacity' => 'required',
             'application_fees' => 'required|numeric',
             'admission_fees' => 'required|numeric',
+         
         ]);
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'message' => $validator->errors()->first()
             ];
             return response()->json($response, 400);
         }
         ;
-if($request->input('seat_capacity')>$course['seat_capacity']){
-    $vacent_seat= $course['vacent_seat'] +( $request->input('seat_capacity') -  $course['seat_capacity']);
-    $course->update([ 'vacent_seat'=> $vacent_seat]);
-    $course->save();
-}
-if($request->input('seat_capacity')<$course['seat_capacity']){
-    $vacent_seat=$course['vacent_seat'] -( $course['seat_capacity']-$request->input('seat_capacity'));
-    $course->update([ 'vacent_seat'=> $vacent_seat]);
-    $course->save();
-}
+        if ($request->input('seat_capacity') > $course['seat_capacity']) {
+            $vacent_seat = $course['vacent_seat'] + ($request->input('seat_capacity') - $course['seat_capacity']);
+            $course->update(['vacent_seat' => $vacent_seat]);
+            $course->save();
+        }
+        if ($request->input('seat_capacity') < $course['seat_capacity']) {
+            $vacent_seat = $course['vacent_seat'] - ($course['seat_capacity'] - $request->input('seat_capacity'));
+            $course->update(['vacent_seat' => $vacent_seat]);
+            $course->save();
+        }
 
 
         $course->update([
             "courseName" => $request->input('courseName'),
-           
+
             "duration" => $request->input('duration'),
             "eligibility" => $request->input('eligibility'),
             "seat_capacity" => $request->input('seat_capacity'),
             "application_fees" => $request->input('application_fees'),
             "admission_fees" => $request->input('admission_fees'),
+      
         ]);
 
 
@@ -444,7 +406,7 @@ if($request->input('seat_capacity')<$course['seat_capacity']){
         $ewsSeats = ceil($totalSeats * 0.1);
         $otherSeats = ceil($totalSeats * 0.02);
         $openSeats = $totalSeats - ($obcSeats + $scSeats + $stSeats + $ewsSeats + $otherSeats);
- 
+
         $seat_structure->update([
             // SeatStructure::create([  
             "total_seat" => $totalSeats,
@@ -458,7 +420,7 @@ if($request->input('seat_capacity')<$course['seat_capacity']){
         ]);
 
         $seat_structure->save();
- 
+
 
         $response = [
             'success' => true,
@@ -533,7 +495,7 @@ if($request->input('seat_capacity')<$course['seat_capacity']){
 
 
     //delete course
-    public function deleteCourse(Request $request, $id)
+    public function DeActive(Request $request, $id)
     {
         $user = $request->user();
         $college = Universitys::where('create-by', $user['id'])->first();
@@ -553,10 +515,23 @@ if($request->input('seat_capacity')<$course['seat_capacity']){
             ];
             return response()->json($response, 200);
         }
-        $course->delete();
+
+        if($course->active==1){
+       
+        $course->update([
+            'active'=>0
+        ]); }
+        else{
+            $course->update([
+                'active'=>1
+            ]);
+        }
+
+        $course->save();
+
         $response = [
             'success' => true,
-            'message' => 'remove course successfully'
+            'message' => 'Deactive course successfully'
 
         ];
         return response()->json($response, 200);

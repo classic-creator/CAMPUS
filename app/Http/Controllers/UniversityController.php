@@ -348,9 +348,10 @@ public function registerApproveCollege(Request $request)
         ->select(
             'courses.*', 'depertments.depertment_name', 'seat_structures.OBC',
             'seat_structures.SC', 'seat_structures.ST', 'seat_structures.open',
-            'seat_structures.total_seat', 'seat_structures.EWS', 'seat_structures.other'
+            'seat_structures.total_seat', 'seat_structures.EWS', 'seat_structures.other' ,'universitys.address','universitys.city',
         )
         ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
+        ->join('universitys', 'universitys.id', '=', 'courses.college_id')
         ->leftJoin('seat_structures', 'seat_structures.course_id', '=', 'courses.id')
         ->where('courses.college_id', $college->college_id)
         ->get();

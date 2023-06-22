@@ -12,6 +12,7 @@ class websiteImg extends Model
     protected $fillable = [
         'image_path',
         'link',
-        'type'
+        'type',
+        'name'
         ];
 }
