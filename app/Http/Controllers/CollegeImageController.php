@@ -41,11 +41,7 @@ class CollegeImageController extends Controller
         if ($request->has('image_path')) {
             $image_name = $request->input('image_name');
 
-            $image_path = $request->file('image_path')
-              
-
-
-                ->store('college_images');
+            $image_path = $request->file('image_path')->store('college_images');
 
             collegeImage::create([
                 'image_name' => $image_name,

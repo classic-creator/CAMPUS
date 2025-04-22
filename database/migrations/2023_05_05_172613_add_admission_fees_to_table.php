@@ -17,7 +17,7 @@ return new class extends Migration
             //
             $table->string('admission_fees');
             $table->string('application_fees');
-            $table->dropColumn('fees');
+          //  $table->dropColumn('fees');
         });
     }
 

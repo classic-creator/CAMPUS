@@ -98,13 +98,18 @@ class CoursesController extends Controller
     {
 
         $course = DB::table('courses')
-            ->select('courses.id', 'courses.courseName', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'courses.active','universitys.address', 'universitys.city')
+            ->select('courses.id', 'courses.courseName','college_images.image_path', 'universitys.collegeName', 'depertments.depertment_name', 'courses.duration', 'courses.eligibility', 'courses.admission_fees', 'courses.application_fees', 'courses.seat_capacity', 'courses.active','universitys.address', 'universitys.city')
             
             ->join('universitys', 'universitys.id', '=', 'courses.college_id')
+            ->leftJoin('college_images', function($join) {
+                $join->on('college_images.college_id', '=', 'universitys.id')
+                     ->where('college_images.type', '=', 'logo');
+            })
             ->join('depertments', 'depertments.id', '=', 'courses.depertment_id')
             ->where('courses.active',1);
 
 
+        
         //search
         if ($keyword = $request->input('keyword')) {
             $course->whereRaw("courseName LIKE '%" . $keyword . "%'")
